@@ -1,0 +1,93 @@
+{
+  "name": "document-organizer",
+  "version": "1.0.0",
+  "description": "批量文档转换技能：将旧版 Office 文档转换为 Markdown",
+  "author": "小新 (OpenClaw AI)",
+  "dependencies": {
+    "python": ">=3.10",
+    "pip_packages": [
+      "markitdown[docx,xlsx,pdf]>=0.1.5",
+      "pywin32>=311;platform_system=='Windows'"
+    ],
+    "external_tools": [
+      {
+        "name": "LibreOffice",
+        "required": true,
+        "download_url": "https://zh-cn.libreoffice.org/",
+        "windows_path": "D:\\Program Files\\LibreOffice\\program\\soffice.exe",
+        "linux_path": "/usr/bin/soffice",
+        "macos_path": "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+      }
+    ]
+  },
+  "config": {
+    "default_source": null,
+    "default_output": "./output",
+    "default_types": ["doc", "xls", "docx", "xlsx"],
+    "temp_dir": "./temp_batch",
+    "log_file": "conversion.log",
+    "soffice_path": null,
+    "recursive": true,
+    "keep_structure": true
+  },
+  "commands": {
+    "convert": {
+      "description": "批量转换文档",
+      "usage": "npx skills run document-organizer --source <dir> --output <dir>",
+      "options": {
+        "--source": "源目录路径（必需）",
+        "--output": "输出目录路径（默认: ./output）",
+        "--type": "处理的文件类型，逗号分隔（默认: doc,xls,docx,xlsx）",
+        "--soffice-path": "LibreOffice  soffice.exe 路径（自动检测）",
+        "--temp-dir": "临时文件目录（默认: ./temp_batch）",
+        "--log-file": "日志文件路径（默认: conversion.log）",
+        "--dry-run": "仅扫描统计，不实际转换",
+        "--help": "显示帮助信息"
+      }
+    },
+    "scan": {
+      "description": "仅扫描统计目录内容",
+      "usage": "npx skills run document-organizer --scan-only --source <dir>"
+    }
+  },
+  "examples": [
+    {
+      "description": "转换整个目录",
+      "command": "npx skills run document-organizer --source \"G:\\历史文档\" --output \"d:\\知识库\""
+    },
+    {
+      "description": "仅转换 Word 文档",
+      "command": "npx skills run document-organizer --source \"G:\\docs\" --type doc,docx"
+    },
+    {
+      "description": "预览即将转换的文件（不执行）",
+      "command": "npx skills run document-organizer --source \"G:\\docs\" --dry-run"
+    }
+  ],
+  "output_format": "Markdown",
+  "supported_formats": {
+    "input": [".doc", ".xls", ".docx", ".xlsx", ".ppt", ".pptx", ".pdf"],
+    "output": [".md"],
+    "intermediate": [".docx", ".xlsx", ".pptx"]
+  },
+  "performance": {
+    " Throughput": {
+      "doc": "~30 文件/秒",
+      "xls": "~20 文件/秒 (转 xlsx) + ~17 文件/秒 (转 md)"
+    },
+    "note": "实际速度取决于硬件和文件复杂度"
+  },
+  "changelog": {
+    "1.0.0": {
+      "date": "2026-03-11",
+      "changes": [
+        "初始版本发布",
+        "支持 .doc 直接转 .md（LibreOffice 批量）",
+        "支持 .xls 两步转换（LibreOffice → .xlsx → MarkItDown）",
+        "按目录分组批量处理",
+        "自动保持目录结构",
+        "错误日志记录"
+      ]
+    }
+  }
+}

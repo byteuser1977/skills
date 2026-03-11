@@ -1,0 +1,30 @@
+{
+  "name": "search-kb",
+  "version": "1.0.0",
+  "description": "Fast full-text search for OpenClaw knowledge bases",
+  "main": "bin/search-kb.js",
+  "bin": {
+    "search-kb": "./bin/search-kb.js"
+  },
+  "scripts": {
+    "test": "node bin/search-kb.js \"项目管理\" --limit 5",
+    "search": "node bin/search-kb.js"
+  },
+  "keywords": [
+    "openclaw",
+    "skill",
+    "search",
+    "knowledge-base",
+    "full-text-search"
+  ],
+  "author": "OpenClaw Agent",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "SKILL.md"
+  ]
+}
