@@ -2,7 +2,7 @@
   "name": "document-organizer",
   "version": "1.0.2",
   "description": "批量文档转换技能：将旧版 Office 文档转换为 Markdown",
-  "author": "小新 (OpenClaw AI)",
+  "author": "byteuser",
   "dependencies": {
     "python": ">=3.10",
     "pip_packages": [
@@ -33,7 +33,7 @@
   "commands": {
     "convert": {
       "description": "批量转换文档",
-      "usage": "npx skills run document-organizer --source <dir> --output <dir>",
+      "usage": "python scripts/batch_convert.py --source <dir> --output <dir>",
       "options": {
         "--source": "源目录路径（必需）",
         "--output": "输出目录路径（默认: ./output）",
@@ -47,21 +47,21 @@
     },
     "scan": {
       "description": "仅扫描统计目录内容",
-      "usage": "npx skills run document-organizer --scan-only --source <dir>"
+      "usage": "python scripts/batch_convert.py --dry-run --source <dir>"
     }
   },
   "examples": [
     {
       "description": "转换整个目录",
-      "command": "npx skills run document-organizer --source \"G:\\历史文档\" --output \"d:\\知识库\""
+      "command": "python scripts/batch_convert.py --source \"G:\\历史文档\" --output \"d:\\知识库\""
     },
     {
       "description": "仅转换 Word 文档",
-      "command": "npx skills run document-organizer --source \"G:\\docs\" --type doc,docx"
+      "command": "python scripts/batch_convert.py --source \"G:\\docs\" --type doc,docx"
     },
     {
       "description": "预览即将转换的文件（不执行）",
-      "command": "npx skills run document-organizer --source \"G:\\docs\" --dry-run"
+      "command": "python scripts/batch_convert.py --source \"G:\\docs\" --dry-run"
     }
   ],
   "output_format": "Markdown",
@@ -69,6 +69,9 @@
     "input": [".doc", ".xls", ".docx", ".xlsx", ".ppt", ".pptx", ".pdf"],
     "output": [".md"],
     "intermediate": [".docx", ".xlsx", ".pptx"]
+  },
+  "scripts": {
+    "main": "scripts/batch_convert.py"
   },
   "performance": {
     " Throughput": {
