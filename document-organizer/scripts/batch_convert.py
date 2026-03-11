@@ -14,6 +14,15 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 import sys
+import json
+
+CONVERT_MARKDOWN_DIR = Path(__file__).parent.parent.parent / "convert-markdown"
+CONVERT_MARKDOWN_SCRIPT = CONVERT_MARKDOWN_DIR / "scripts" / "convert_markonverter.py"
+
+def get_convert_markdown_script():
+    if CONVERT_MARKDOWN_SCRIPT.exists():
+        return str(CONVERT_MARKDOWN_SCRIPT)
+    return None
 
 def find_libreoffice():
     """自动查找 LibreOffice 安装路径"""
@@ -219,6 +228,11 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
 def convert_modern(by_dir, file_type, label, output_dir, all_failed):
     """使用 convert-markdown 技能转换现代格式（.xlsx, .pptx, .docx）"""
     success = 0
+    
+    convert_script = get_convert_markdown_script()
+    if not convert_script:
+        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 {label} 转换")
+        return success
 
     for parent_dir, files in by_dir.items():
         if not files:
@@ -226,16 +240,15 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
         output_subdir = output_dir / parent_dir
         output_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 调用 convert-markdown 技能批量转换
         try:
-            # 为每个文件调用 convert 命令
             for src_file in files:
-                # 确保只处理指定类型的文件
                 if src_file.suffix.lower() == file_type:
+                    output_file = output_subdir / src_file.with_suffix('.md').name
                     cmd = [
-                        "npx", "skills", "run", "convert-markdown", "convert",
-                        "--input", str(src_file),
-                        "--output", str(output_subdir / src_file.with_suffix('.md').name)
+                        sys.executable,
+                        convert_script,
+                        str(src_file),
+                        "-o", str(output_file)
                     ]
                     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                     if result.returncode == 0:
@@ -255,6 +268,11 @@ def convert_pdfs(by_dir, output_dir):
     print(f"\n[步骤 6] PDF 文档转换 (.pdf → .md)")
     success = 0
     failed = []
+    
+    convert_script = get_convert_markdown_script()
+    if not convert_script:
+        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 PDF 转换")
+        return success, failed
 
     for parent_dir, files in by_dir.items():
         if not files:
@@ -264,10 +282,12 @@ def convert_pdfs(by_dir, output_dir):
 
         for src_file in files:
             try:
+                output_file = output_subdir / src_file.with_suffix('.md').name
                 cmd = [
-                    "npx", "skills", "run", "convert-markdown", "convert",
-                    "--input", str(src_file),
-                    "--output", str(output_subdir / src_file.with_suffix('.md').name)
+                    sys.executable,
+                    convert_script,
+                    str(src_file),
+                    "-o", str(output_file)
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                 if result.returncode == 0:
