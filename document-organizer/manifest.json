@@ -1,6 +1,6 @@
 {
   "name": "document-organizer",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "批量文档转换技能：将旧版 Office 文档转换为 Markdown",
   "author": "小新 (OpenClaw AI)",
   "dependencies": {

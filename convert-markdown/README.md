@@ -123,7 +123,7 @@ markitdown financial_report.xlsx > report.md
 
 ## 版本信息
 
-- 当前版本：1.0.1
+- 当前版本：1.0.2
 - 基于：MarkItDown 0.1.0+
 
 ## 相关链接

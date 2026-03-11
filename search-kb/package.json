@@ -1,6 +1,6 @@
 {
   "name": "search-kb",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Fast full-text search for OpenClaw knowledge bases",
   "main": "bin/search-kb.js",
   "bin": {
