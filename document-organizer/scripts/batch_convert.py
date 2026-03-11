@@ -301,8 +301,8 @@ def main():
 
     # 1. 转换 .doc
     if any(doc_files_by_dir.values()):
-        from markitdown import MarkItDown
-        md_converter = MarkItDown()
+        from markitdown import genMarkdown
+        md_converter = genMarkdown()
         success, failed = convert_docs(doc_files_by_dir, source_dir, output_dir, soffice_path, temp_root)
         total_success += success
         all_failed.extend([(f, "doc", err) for f, err in failed])
@@ -334,8 +334,8 @@ def main():
         total_success += success
         return success
 
-    # 3. 现代 Office 格式 (.docx, .xlsx, .pptx) - MarkItDown 直接转换
-    md_converter = MarkItDown()
+    # 3. 现代 Office 格式 (.docx, .xlsx, .pptx) - genMarkdown 直接转换
+    md_converter = genMarkdown()
 
     if any(docx_files_by_dir.values()):
         convert_modern(docx_files_by_dir, '.docx', md_converter, "DOCX")
