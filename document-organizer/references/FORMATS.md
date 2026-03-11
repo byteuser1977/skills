@@ -9,7 +9,7 @@
 | 格式分类 | 格式 | 扩展名 | 处理方式 | 质量 | 必需依赖 |
 |---------|------|--------|---------|------|---------|
 | **旧版 Word** | Word 97-2003 | `.doc` | LibreOffice → Markdown | ✅ 完美 | LibreOffice |
-| **新版 Word** | Word 2007+ | `.docx` | MarkItDown 直接 | ✅ 完美 | markitdown |
+| **新版 Word** | Word 2007+ | `.docx` | LibreOffice → Markdown | ✅ 完美 | LibreOffice |
 | **旧版 Excel** | Excel 97-2003 | `.xls` | LibreOffice → .xlsx → MarkItDown | ✅ 完美 | LibreOffice + markitdown |
 | **新版 Excel** | Excel 2007+ | `.xlsx` | MarkItDown 直接 | ✅ 完美 | markitdown |
 | **旧版 PPT** | PowerPoint 97-2003 | `.ppt` | LibreOffice → .pptx → MarkItDown | ✅ 良好 | LibreOffice + markitdown |
@@ -25,21 +25,21 @@
 **处理流程**:
 ```
 原始 .doc 文件
-    ↓ (LibreOffice --convert-to markdown)
-Markdown 文件 (.markdown → .md)
+    ↓ (LibreOffice --convert-to md)
+Markdown 文件 (.md)
 ```
 
 **特点**:
 - ✅ 一步到位，不生成中间文件
 - ✅ LibreOffice 内置的 Markdown 导出器
-- ✅ 批量处理（`soffice --convert-to markdown *.doc`）
+- ✅ 批量处理（`soffice --convert-to md *.doc`）
 - ⚠️ 复杂格式可能略有简化
 
 **质量评估**: 95%+ 格式保留
 
 **示例**:
 ```bash
-soffice --headless --convert-to markdown --outdir ./output ./temp/*.doc
+soffice --headless --convert-to md --outdir ./output *.doc
 ```
 
 **已知限制**:
@@ -54,23 +54,24 @@ soffice --headless --convert-to markdown --outdir ./output ./temp/*.doc
 **处理流程**:
 ```
 原始 .docx 文件
-    ↓ (MarkItDown.convert())
-结构化的 Markdown
+    ↓ (LibreOffice --convert-to md)
+Markdown 文件 (.md)
 ```
 
 **特点**:
+- ✅ 一步到位，不生成中间文件
+- ✅ LibreOffice 内置的 Markdown 导出器
+- ✅ 批量处理（`soffice --convert-to md *.docx`）
 - ✅ 完美保留标题层级、列表、加粗、斜体
 - ✅ 表格转为 Markdown 表格
 - ✅ 图片链接自动处理（输出为 `![alt](path)`）
 - ✅ 超链接完整保留
 
-**质量评估**: 98%+ 格式保留
+**质量评估**: 95%+ 格式保留
 
-**示例代码**:
-```python
-from markitdown import MarkItDown
-md = MarkItDown()
-result = md.convert("document.docx")
+**示例**:
+```bash
+soffice --headless --convert-to md --outdir ./output *.docx
 ```
 
 ---
@@ -180,15 +181,15 @@ markitdown scanned.pdf --ocr --lang chi_sim
 
 | 特性 | .doc | .docx | .xls | .xlsx | .ppt | .pptx | .pdf |
 |------|------|-------|------|-------|------|-------|------|
-| **文本保留** | ✅ 优秀 | ✅ 完美 | ✅ 完美 | ✅ 完美 | ✅ 优秀 | ✅ 优秀 | ✅ 优秀 |
+| **文本保留** | ✅ 优秀 | ✅ 优秀 | ✅ 完美 | ✅ 完美 | ✅ 优秀 | ✅ 优秀 | ✅ 优秀 |
 | **表格保留** | N/A | N/A | ✅ 完美 | ✅ 完美 | ⚠️ 部分 | ⚠️ 部分 | ✅ 良好 |
 | **图片提取** | ✅ 是 | ✅ 是 | ❌ 否 | ❌ 否 | ✅ 是 | ✅ 是 | ✅ 是 |
 | **超链接** | ✅ 保留 | ✅ 保留 | ❌ 丢失 | ❌ 丢失 | ✅ 保留 | ✅ 保留 | ✅ 保留 |
 | **多Sheet/页** | N/A | N/A | ✅ 支持 | ✅ 支持 | ✅ 支持 | ✅ 支持 | ✅ 支持 |
-| **宏/VBA** | ❌ 丢失 | ⚠️ 部分 | N/A | N/A | N/A | N/A | N/A |
+| **宏/VBA** | ❌ 丢失 | ❌ 丢失 | N/A | N/A | N/A | N/A | N/A |
 | **公式** | ⚠️ 值 | ⚠️ 值 | ⚠️ 值 | ⚠️ 值 | N/A | N/A | N/A |
 | **批注** | ⚠️ 部分 | ⚠️ 部分 | N/A | N/A | ⚠️ 部分 | ⚠️ 部分 | ❌ 丢失 |
-| **依赖要求** | LibreOffice | markitdown | LibreOffice+md | markitdown | LibreOffice+md | markitdown | markitdown |
+| **依赖要求** | LibreOffice | LibreOffice | LibreOffice+md | markitdown | LibreOffice+md | markitdown | markitdown |
 
 ---
 
@@ -225,7 +226,7 @@ if ft == '.ppt':
 | 格式 | 总体评分 | 文本 | 结构 | 表格 | 图片 | 链接 |
 |------|---------|------|------|------|------|------|
 | `.doc` | 95% | ✅ | ✅ | N/A | ✅ | ✅ |
-| `.docx` | 98% | ✅ | ✅ | N/A | ✅ | ✅ |
+| `.docx` | 95% | ✅ | ✅ | N/A | ✅ | ✅ |
 | `.xls` | 95% | ✅ | ✅ | ✅ | ❌ | ❌ |
 | `.xlsx` | 95% | ✅ | ✅ | ✅ | ❌ | ❌ |
 | `.ppt` | 85% | ✅ | ⚠️ | N/A | ✅ | ✅ |
@@ -247,11 +248,11 @@ npx skills run document-organizer --source "G:\old_docs" --type doc
 ```
 
 ### 场景 2: 现代 Office 文档处理
-**推荐格式**: `.docx` / `.xlsx` / `.pptx`
+**推荐格式**: `.xlsx` / `.pptx`
 **原因**: MarkItDown 直接处理，无需 LibreOffice
 **命令**:
 ```bash
-npx skills run document-organizer --source "G:\new_docs" --type docx,xlsx
+npx skills run document-organizer --source "G:\new_docs" --type xlsx,pptx
 ```
 
 ### 场景 3: 混合历史文档（最常见）
@@ -331,5 +332,5 @@ def detect_format(filepath):
 ---
 
 **最后更新**: 2026-03-11  
-**对应版本**: document-organizer v1.0.0  
+**对应版本**: document-organizer v1.1.0  
 **维护**: 比特老板 / OpenClaw AI

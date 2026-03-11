@@ -12,9 +12,10 @@
 
 ### ✅ 格式转换
 - **Word 97-2003** (`.doc`) → **Markdown** (一步到位)
+- **Word 2007+** (`.docx`) → **Markdown** (一步到位)
 - **Excel 97-2003** (`.xls`) → **Markdown** (表格完美保留)
 - **PowerPoint 97-2003** (`.ppt`) → **Markdown** (演示文稿转换)
-- **现代格式** (`.docx`/`.xlsx`/`.pptx`) → **Markdown** (直接支持)
+- **现代格式** (`.xlsx`/`.pptx`) → **Markdown** (直接支持)
 - **PDF 文档** (`.pdf`) → **Markdown** (文本和表格提取)
 
 ### ✅ 批量处理
@@ -126,10 +127,14 @@ npx skills run document-organizer \
 ## 技术架构
 
 ```
-源文档 (.doc, .xls, .pdf, ...)
+源文档 (.doc, .docx, .xls, .pdf, ...)
     │
     ├─ .doc 文件 ─────────────────┐
-    │   LibreOffice --convert-to markdown (批量) │
+    │   LibreOffice --convert-to md (批量) │
+    │   └─> .md (保留标题/列表)   │
+    │                              │
+    ├─ .docx 文件 ────────────────┤
+    │   LibreOffice --convert-to md (批量) │
     │   └─> .md (保留标题/列表)   │
     │                              │
     ├─ .xls 文件 ─────────────────┤
@@ -146,7 +151,7 @@ npx skills run document-organizer \
     │   MarkItDown (文本+表格提取)│
     │   └─> .md (保留文本和表格) │
     │                              │
-    └─ 现代格式 (.docx/.xlsx/.pptx) ──► MarkItDown 直接转换
+    └─ 现代格式 (.xlsx/.pptx) ────► MarkItDown 直接转换
                                       │
         输出目录（保持原目录结构） ◄───┘
 ```
@@ -232,6 +237,13 @@ skills/
 ---
 
 ## 版本历史
+
+### v1.0.2 (2026-03-11)
+- ✅ 优化：移除临时目录，直接生成 .md 文件
+- ✅ 新增：.docx 文件 LibreOffice 直接转换
+- ✅ 优化：convert_modern 支持参数调用
+- ✅ 优化：批量转换逻辑，提高速度
+- ✅ 优化：--dry-run 模式跳过 LibreOffice 检查
 
 ### v1.0.0 (2026-03-11)
 - ✅ 初始版本

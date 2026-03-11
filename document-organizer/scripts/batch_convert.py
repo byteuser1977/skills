@@ -73,46 +73,60 @@ def convert_docs(by_dir, source_dir, output_dir, soffice_path, temp_root):
         output_subdir = output_dir / parent_dir
         output_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 临时目录（批量转换需要）
-        temp_subdir = temp_root / "docs" / parent_dir
-        temp_subdir.mkdir(parents=True, exist_ok=True)
-
-        # 复制文件
-        for src_file in files:
-            dest = temp_subdir / src_file.name
-            shutil.copy2(src_file, dest)
-
-        # 批量转换（只对 .doc 文件，.docx 跳过）
-        doc_files = [f for f in temp_subdir.glob("*.doc")]
-        if doc_files:
-            cmd = [soffice_path, "--headless", "--convert-to", "markdown", "--outdir", str(output_subdir), str(temp_subdir / "*.doc")]
+        # 批量转换（直接使用源文件）
+        if files:
+            # 构建文件路径列表
+            file_paths = [str(f) for f in files]
+            # 直接生成 .md 文件到目标目录
+            cmd = [soffice_path, "--headless", "--convert-to", "md", "--outdir", str(output_subdir)] + file_paths
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                 if result.returncode != 0:
                     failed.append((parent_dir, f"LibreOffice exit: {result.returncode}"))
+                else:
+                    # 计算成功转换的文件数
+                    success_count = len(list(output_subdir.glob("*.md")))
+                    success += success_count
+                    print(f"  {parent_dir}: {success_count}/{len(files)}")
             except subprocess.TimeoutExpired:
                 failed.append((parent_dir, "Timeout"))
 
-        # 重命名 .markdown → .md
-        count = 0
-        for md_file in output_subdir.glob("*.markdown"):
-            target = md_file.with_suffix('.md')
-            if target.exists():
-                target.unlink()
-            md_file.rename(target)
-            count += 1
+    return success, failed
 
-        success += count
-        print(f"  {parent_dir}: {count}/{len(files)}")
+def convert_docx(by_dir, source_dir, output_dir, soffice_path, temp_root):
+    """批量转换 .docx 文件为 .md（LibreOffice 直接）"""
+    print(f"\n[步骤 2] Word 文档转换 (.docx → .md)")
+    success = 0
+    failed = []
 
-        # 清理临时
-        shutil.rmtree(temp_subdir, ignore_errors=True)
+    for parent_dir, files in by_dir.items():
+        output_subdir = output_dir / parent_dir
+        output_subdir.mkdir(parents=True, exist_ok=True)
+
+        # 批量转换（直接使用源文件）
+        if files:
+            # 构建文件路径列表
+            file_paths = [str(f) for f in files]
+            # 直接生成 .md 文件到目标目录
+            cmd = [soffice_path, "--headless", "--convert-to", "md", "--outdir", str(output_subdir)] + file_paths
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                if result.returncode != 0:
+                    failed.append((parent_dir, f"LibreOffice exit: {result.returncode}"))
+                else:
+                    # 计算成功转换的文件数
+                    success_count = len(list(output_subdir.glob("*.md")))
+                    success += success_count
+                    print(f"  {parent_dir}: {success_count}/{len(files)}")
+            except subprocess.TimeoutExpired:
+                failed.append((parent_dir, "Timeout"))
 
     return success, failed
 
-def convert_excels(by_dir, source_dir, output_dir, soffice_path, temp_root):
+
+def convert_excels(by_dir, source_dir, output_dir, soffice_path, temp_root, all_failed):
     """批量转换 .xls 文件：.xls → .xlsx → .md（使用 convert-markdown 技能）"""
-    print(f"\n[步骤 2] Excel 表格转换 (.xls → .xlsx → .md)")
+    print(f"\n[步骤 3] Excel 表格转换 (.xls → .xlsx → .md)")
     success = 0
     failed = []
 
@@ -143,33 +157,21 @@ def convert_excels(by_dir, source_dir, output_dir, soffice_path, temp_root):
                 shutil.rmtree(temp_subdir, ignore_errors=True)
                 continue
 
-        # 对生成的 .xlsx 和原有的 .xlsx 使用 convert-markdown 转换
+        # 对生成的 .xlsx 使用 convert_modern 处理
         xlsx_files = list(temp_subdir.glob("*.xlsx"))
-        for xlsx_file in xlsx_files:
-            try:
-                md_name = xlsx_file.with_suffix('.md').name
-                # 调用 convert-markdown 技能
-                cmd = [
-                    "npx", "skills", "run", "convert-markdown", "convert",
-                    "--input", str(xlsx_file),
-                    "--output", str(output_subdir / md_name)
-                ]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-                if result.returncode == 0:
-                    success += 1
-                else:
-                    failed.append((str(xlsx_file), f"Exit {result.returncode}: {result.stderr}"))
-            except Exception as e:
-                failed.append((str(xlsx_file), str(e)))
+        if xlsx_files:
+            # 创建包含 xlsx 文件的目录结构
+            xlsx_by_dir = {parent_dir: xlsx_files}
+            # 调用 convert_modern 处理 xlsx
+            success += convert_modern(xlsx_by_dir, '.xlsx', 'XLSX', output_dir, all_failed)
 
         shutil.rmtree(temp_subdir, ignore_errors=True)
-        print(f"  {parent_dir}: {success} 累计成功")
 
     return success, failed
 
-def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_root):
+def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_root, all_failed):
     """批量转换 .ppt 文件：.ppt → .pptx → .md"""
-    print(f"\n[步骤 3] PowerPoint 转换 (.ppt → .pptx → .md)")
+    print(f"\n[步骤 4] PowerPoint 转换 (.ppt → .pptx → .md)")
     success = 0
     failed = []
 
@@ -202,31 +204,20 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
                 shutil.rmtree(temp_subdir, ignore_errors=True)
                 continue
 
-        # 对所有 .pptx 使用 convert-markdown 转换
+        # 对所有 .pptx 使用 convert_modern 处理
         pptx_files = list(temp_subdir.glob("*.pptx"))
-        for pptx_file in pptx_files:
-            try:
-                md_name = pptx_file.with_suffix('.md').name
-                cmd = [
-                    "npx", "skills", "run", "convert-markdown", "convert",
-                    "--input", str(pptx_file),
-                    "--output", str(output_subdir / md_name)
-                ]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-                if result.returncode == 0:
-                    success += 1
-                else:
-                    failed.append((str(pptx_file), f"Exit {result.returncode}: {result.stderr}"))
-            except Exception as e:
-                failed.append((str(pptx_file), str(e)))
+        if pptx_files:
+            # 创建包含 pptx 文件的目录结构
+            pptx_by_dir = {parent_dir: pptx_files}
+            # 调用 convert_modern 处理 pptx
+            success += convert_modern(pptx_by_dir, '.pptx', 'PPTX', output_dir, all_failed)
 
         shutil.rmtree(temp_subdir, ignore_errors=True)
-        print(f"  {parent_dir}: {success} 累计成功")
 
     return success, failed
 
-def convert_modern(by_dir, suffix, label):
-    """使用 convert-markdown 技能转换现代格式（.docx, .xlsx, .pptx）"""
+def convert_modern(by_dir, file_type, label, output_dir, all_failed):
+    """使用 convert-markdown 技能转换现代格式（.xlsx, .pptx, .docx）"""
     success = 0
 
     for parent_dir, files in by_dir.items():
@@ -235,30 +226,25 @@ def convert_modern(by_dir, suffix, label):
         output_subdir = output_dir / parent_dir
         output_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 获取该目录下的文件列表
-        input_files = [str(f) for f in files]
-
         # 调用 convert-markdown 技能批量转换
         try:
-            # 构建子目录相对路径，用于 output 子目录
-            # 这里简化为每个文件单独调用（因为 convert-markdown batch 需要 source/target 目录）
-            # 更高效的方式是调用 batch，但需要确保 output_subdir 先创建
-
-            # 方法：为每个文件调用 convert 命令
+            # 为每个文件调用 convert 命令
             for src_file in files:
-                cmd = [
-                    "npx", "skills", "run", "convert-markdown", "convert",
-                    "--input", str(src_file),
-                    "--output", str(output_subdir / src_file.with_suffix('.md').name)
-                ]
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-                if result.returncode == 0:
-                    success += 1
-                else:
-                    all_failed.append((str(src_file), suffix, f"Exit {result.returncode}: {result.stderr}"))
+                # 确保只处理指定类型的文件
+                if src_file.suffix.lower() == file_type:
+                    cmd = [
+                        "npx", "skills", "run", "convert-markdown", "convert",
+                        "--input", str(src_file),
+                        "--output", str(output_subdir / src_file.with_suffix('.md').name)
+                    ]
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                    if result.returncode == 0:
+                        success += 1
+                    else:
+                        all_failed.append((str(src_file), file_type, f"Exit {result.returncode}: {result.stderr}"))
 
         except Exception as e:
-            all_failed.append((parent_dir, suffix, str(e)))
+            all_failed.append((parent_dir, file_type, str(e)))
 
         print(f"  {label} {parent_dir}: {success} 累计成功")
 
@@ -266,7 +252,7 @@ def convert_modern(by_dir, suffix, label):
 
 def convert_pdfs(by_dir, output_dir):
     """批量转换 .pdf 文件 - 使用 convert-markdown 技能"""
-    print(f"\n[步骤 4] PDF 文档转换 (.pdf → .md)")
+    print(f"\n[步骤 6] PDF 文档转换 (.pdf → .md)")
     success = 0
     failed = []
 
@@ -314,11 +300,13 @@ def main():
         shutil.rmtree(temp_root)
     temp_root.mkdir(parents=True, exist_ok=True)
 
-    # 查找 LibreOffice
-    soffice_path = args.soffice_path or find_libreoffice()
-    if not soffice_path or not Path(soffice_path).exists():
-        print("❌ 未找到 LibreOffice，请安装或指定路径")
-        sys.exit(1)
+    # 查找 LibreOffice（仅在非 dry-run 模式下）
+    soffice_path = None
+    if not args.dry_run:
+        soffice_path = args.soffice_path or find_libreoffice()
+        if not soffice_path or not Path(soffice_path).exists():
+            print("❌ 未找到 LibreOffice，请安装或指定路径")
+            sys.exit(1)
 
     print("="*60)
     print("文档批量转换工具")
@@ -362,29 +350,31 @@ def main():
         total_success += success
         all_failed.extend([(f, "doc", err) for f, err in failed])
 
-    # 2. 转换 .xls
+    # 2. 转换 .docx
+    if any(docx_files_by_dir.values()):
+        success, failed = convert_docx(docx_files_by_dir, source_dir, output_dir, soffice_path, temp_root)
+        total_success += success
+        all_failed.extend([(f, "docx", err) for f, err in failed])
+
+    # 3. 转换 .xls
     if any(xls_files_by_dir.values()):
-        success, failed = convert_excels(xls_files_by_dir, source_dir, output_dir, soffice_path, temp_root)
+        success, failed = convert_excels(xls_files_by_dir, source_dir, output_dir, soffice_path, temp_root, all_failed)
         total_success += success
         all_failed.extend([(f, "xls", err) for f, err in failed])
 
-    # 3. 转换 .ppt
+    # 4. 转换 .ppt
     if any(ppt_files_by_dir.values()):
-        success, failed = convert_presentations(ppt_files_by_dir, source_dir, output_dir, soffice_path, temp_root)
+        success, failed = convert_presentations(ppt_files_by_dir, source_dir, output_dir, soffice_path, temp_root, all_failed)
         total_success += success
         all_failed.extend([(f, "ppt", err) for f, err in failed])
 
-    # 4. 现代格式（直接 MarkItDown）
-    if any(docx_files_by_dir.values()):
-        success = convert_modern(docx_files_by_dir, '.docx', "DOCX")
-        total_success += success
-
+    # 5. 现代格式（直接 MarkItDown）
     if any(xlsx_files_by_dir.values()):
-        success = convert_modern(xlsx_files_by_dir, '.xlsx', "XLSX")
+        success = convert_modern(xlsx_files_by_dir, '.xlsx', "XLSX", output_dir, all_failed)
         total_success += success
 
     if any(pptx_files_by_dir.values()):
-        success = convert_modern(pptx_files_by_dir, '.pptx', "PPTX")
+        success = convert_modern(pptx_files_by_dir, '.pptx', "PPTX", output_dir, all_failed)
         total_success += success
 
     # 5. PDF 转换

@@ -10,9 +10,10 @@
 
 ### ✅ 格式转换
 - **Word 文档**: `.doc` → `.md`（LibreOffice 直接转换）
+- **Word 文档**: `.docx` → `.md`（LibreOffice 直接转换）
 - **Excel 表格**: `.xls` → `.xlsx` → `.md`（保留表格结构）
 - **PowerPoint**: `.ppt` → `.pptx` → `.md`（可选支持）
-- **现代格式**: `.docx`/`.xlsx`/`.pptx` → `.md`（MarkItDown 直接处理）
+- **现代格式**: `.xlsx`/`.pptx` → `.md`（MarkItDown 直接处理）
 
 ### ✅ 批量处理
 - 支持按目录批量转换
@@ -67,8 +68,8 @@ npx skills run document-organizer --source "源目录" --output "输出目录" -
 | 源格式 | 转换流程 | 输出格式 | 质量 |
 |--------|---------|---------|------|
 | `.doc` | LibreOffice → Markdown | `.md` | ✅ 完美 |
+| `.docx` | LibreOffice → Markdown | `.md` | ✅ 完美 |
 | `.xls` | LibreOffice → .xlsx → MarkItDown → .md | `.md` | ✅ 完美 |
-| `.docx` | MarkItDown → .md | `.md` | ✅ 完美 |
 | `.xlsx` | MarkItDown → .md | `.md` | ✅ 完美 |
 | `.ppt` | LibreOffice → .pptx → MarkItDown → .md | `.md` | ✅ 良好 |
 | `.pptx` | MarkItDown → .md | `.md` | ✅ 良好 |
@@ -79,10 +80,16 @@ npx skills run document-organizer --source "源目录" --output "输出目录" -
 **方案一：分类批量（推荐）**
 ```
 批量转换所有 .doc 文件:
-  soffice --convert-to markdown *.doc
+  soffice --convert-to md *.doc
+
+批量转换所有 .docx 文件:
+  soffice --convert-to md *.docx
 
 批量转换所有 .xls 文件:
   soffice --convert-to xlsx *.xls  →  markitdown *.xlsx
+
+批量转换所有 .ppt 文件:
+  soffice --convert-to pptx *.ppt  →  markitdown *.pptx
 ```
 
 **方案二：递归处理**
@@ -273,7 +280,13 @@ npx skills run document-organizer --source "docs" --filter "00_模板/*.doc"
 
 ## 版本历史
 
-- **v1.0** (2026-03-11)
+- **v1.0.2** (2026-03-11)
+  - 优化：移除临时目录，直接生成 .md 文件
+  - 新增：.docx 文件 LibreOffice 直接转换
+  - 优化：convert_modern 支持参数调用
+  - 优化：批量转换逻辑，提高速度
+
+- **v1.0.0** (2026-03-11)
   - 初始版本
   - 支持 .doc/.xls 批量转换
   - 优化：LibreOffice 直接转 Markdown
