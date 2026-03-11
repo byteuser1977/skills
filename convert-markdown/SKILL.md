@@ -57,7 +57,35 @@ pip install 'markitdown[pdf,docx,pptx]'
 
 ### 3. 基本使用
 
-#### 命令行方式
+#### NPX CLI 方式（推荐）
+
+本技能提供 NPX CLI 工具，可直接通过 npx 命令调用：
+
+```bash
+# 查看帮助
+npx convert-markdown
+
+# 转换单个文件
+npx convert-markdown convert --input document.pdf --output document.md
+
+# 转换目录
+npx convert-markdown convert --input ./docs --output ./markdown
+
+# 批量转换（指定格式）
+npx convert-markdown batch --source ./docs --target ./markdown --include .pdf,.docx
+
+# 覆盖已存在文件
+npx convert-markdown convert --input document.pdf --output document.md --overwrite
+```
+
+**CLI 命令说明：**
+
+| 命令 | 说明 | 参数 |
+|------|------|------|
+| `convert` | 转换文件或目录 | `--input`, `--output`, `--overwrite` |
+| `batch` | 批量转换目录 | `--source`, `--target`, `--include`, `--exclude` |
+
+#### MarkItDown 命令行方式
 
 转换单个文件：
 ```bash

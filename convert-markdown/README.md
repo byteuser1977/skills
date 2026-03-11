@@ -19,6 +19,7 @@
 ### 环境要求
 
 - Python 3.10 或更高版本
+- Node.js 14.0+（使用 NPX CLI 时需要）
 
 ### 安装步骤
 
@@ -41,7 +42,35 @@ pip install 'markitdown[pdf,docx,pptx]'
 
 ## 使用方法
 
-### 命令行方式
+### NPX CLI 方式（推荐）
+
+本技能提供 NPX CLI 工具，可直接通过 npx 命令调用：
+
+```bash
+# 查看帮助
+npx convert-markdown
+
+# 转换单个文件
+npx convert-markdown convert --input document.pdf --output document.md
+
+# 转换目录
+npx convert-markdown convert --input ./docs --output ./markdown
+
+# 批量转换（指定格式）
+npx convert-markdown batch --source ./docs --target ./markdown --include .pdf,.docx
+
+# 覆盖已存在文件
+npx convert-markdown convert --input document.pdf --output document.md --overwrite
+```
+
+**CLI 命令说明：**
+
+| 命令 | 说明 | 参数 |
+|------|------|------|
+| `convert` | 转换文件或目录 | `--input`, `--output`, `--overwrite` |
+| `batch` | 批量转换目录 | `--source`, `--target`, `--include`, `--exclude` |
+
+### MarkItDown 命令行方式
 
 ```bash
 # 转换单个文件
@@ -73,15 +102,20 @@ with open("output.md", "w", encoding="utf-8") as f:
 
 ```
 convert-markdown/
-├── scripts/               # 可执行脚本
+├── bin/                   # NPX CLI 入口
+│   └── convert-markdown.js
+├── scripts/               # Python 脚本
+│   ├── cli.py             # CLI 实现
 │   ├── batch_convert.py   # 批量转换脚本
-│   ├── convert_markonverter.py
-│   └── kb_index_generator.py
+│   └── convert_markonverter.py
 ├── references/            # 参考文档
 │   ├── API_REFERENCE.md   # API 参考
 │   ├── FORMATS.md         # 支持格式列表
 │   └── PDF_CONFIG.md      # PDF 配置指南
-└── SKILL.md               # 详细技能文档
+├── package.json           # Node.js 包配置
+├── manifest.json          # 技能定义
+├── SKILL.md               # 详细技能文档
+└── README.md              # 本文件
 ```
 
 ## 快速示例
@@ -89,21 +123,20 @@ convert-markdown/
 ### 批量转换知识库文档
 
 ```bash
-mkdir converted_docs
-markitdown ./source_documents/ --recursive -o ./converted_docs/
+npx convert-markdown batch --source ./source_documents --target ./converted_docs
 ```
 
 ### 处理扫描版 PDF
 
 ```bash
 pip install 'markitdown[pdf]'  # 包含 OCR 功能
-markitdown scanned_document.pdf -o text.md
+npx convert-markdown convert --input scanned_document.pdf --output text.md
 ```
 
 ### 提取表格数据
 
 ```bash
-markitdown financial_report.xlsx > report.md
+npx convert-markdown convert --input financial_report.xlsx --output report.md
 ```
 
 ## 详细文档
