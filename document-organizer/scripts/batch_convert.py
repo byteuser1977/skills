@@ -146,23 +146,36 @@ def convert_excels(by_dir, source_dir, output_dir, soffice_path, temp_root, all_
         temp_subdir = temp_root / "excels" / parent_dir
         temp_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 复制
+        # 复制文件到临时目录
         for src_file in files:
             dest = temp_subdir / src_file.name
-            shutil.copy2(src_file, dest)
+            try:
+                shutil.copy2(src_file, dest)
+            except Exception as e:
+                print(f"    [WARN] 复制失败 {src_file.name}: {e}")
+                continue
 
         # 批量转 .xlsx（只对 .xls 文件）
         xls_files = [f for f in temp_subdir.glob("*.xls")]
         if xls_files:
+            # 使用通配符方式（LibreOffice 支持自动展开）
             cmd = [soffice_path, "--headless", "--convert-to", "xlsx", "--outdir", str(temp_subdir), str(temp_subdir / "*.xls")]
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                print(f"    [DEBUG] CMD: {' '.join(cmd)}")
+                print(f"    [DEBUG] 处理 {len(xls_files)} 个 .xls 文件: {[f.name for f in xls_files]}")
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)  # 增加超时
                 if result.returncode != 0:
-                    failed.append((parent_dir, "LibreOffice failed"))
+                    error_msg = f"LibreOffice exit {result.returncode}: {result.stderr or result.stdout}"
+                    print(f"    [ERROR] {error_msg}")
+                    failed.append((parent_dir, error_msg))
                     shutil.rmtree(temp_subdir, ignore_errors=True)
                     continue
+                else:
+                    print(f"    [OK] LibreOffice 完成，输出 {len(list(temp_subdir.glob('*.xlsx')))} 个 .xlsx")
             except subprocess.TimeoutExpired:
-                failed.append((parent_dir, "Timeout"))
+                error_msg = "LibreOffice timeout (600s)"
+                print(f"    [ERROR] {error_msg}")
+                failed.append((parent_dir, error_msg))
                 shutil.rmtree(temp_subdir, ignore_errors=True)
                 continue
 
@@ -193,14 +206,19 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
         temp_subdir = temp_root / "presentations" / parent_dir
         temp_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 复制
+        # 复制文件到临时目录
         for src_file in files:
             dest = temp_subdir / src_file.name
-            shutil.copy2(src_file, dest)
+            try:
+                shutil.copy2(src_file, dest)
+            except Exception as e:
+                print(f"    [WARN] 复制失败 {src_file.name}: {e}")
+                continue
 
         # 转 .pptx (只对 .ppt)
         ppt_files = [f for f in temp_subdir.glob("*.ppt")]
         if ppt_files:
+            # 使用通配符方式（LibreOffice 支持自动展开）
             cmd = [soffice_path, "--headless", "--convert-to", "pptx", "--outdir", str(temp_subdir), str(temp_subdir / "*.ppt")]
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -254,7 +272,9 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
                     if result.returncode == 0:
                         success += 1
                     else:
-                        all_failed.append((str(src_file), file_type, f"Exit {result.returncode}: {result.stderr}"))
+                        error_msg = f"Exit {result.returncode}: {result.stderr.strip() or result.stdout.strip()}"
+                        all_failed.append((str(src_file), file_type, error_msg))
+                        print(f"    [DEBUG] {src_file.name} 失败: {error_msg}")
 
         except Exception as e:
             all_failed.append((parent_dir, file_type, str(e)))
