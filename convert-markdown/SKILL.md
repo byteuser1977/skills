@@ -1,6 +1,6 @@
 ---
 name: convert-markdown
-version: 1.0.2
+version: 1.0.3
 description: 文档处理与转换技能，基于 MarkItDown 工具。支持将 PDF、Word、PowerPoint、Excel、图片、音频等多种格式文件批量转换为 Markdown。适用于文档数字化、知识库构建、内容提取等场景。
 ---
 
@@ -279,5 +279,10 @@ pip install markitdown[all,mcp]
 - [MCP 服务器文档](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp)
 
 ## 更新日志
+
+- 2026-03-12 - v1.0.3 版本：
+  - 修复：修正 CLI 脚本中指向 convert_markonverter.py 的路径错误
+  - 优化：更新版本号，保持与 package.json 一致
+  - 维护：清理冗余的 Node.js 包装器配置
 
 - 2026-03-09 - 初始版本，基于 MarkItDown 0.1.0+ 创建技能模板

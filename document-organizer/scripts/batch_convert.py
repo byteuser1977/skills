@@ -16,24 +16,25 @@ from datetime import datetime
 import sys
 import json
 
-CONVERT_MARKDOWN_DIR = Path(__file__).parent.parent.parent / "convert-markdown"
-CONVERT_MARKDOWN_SCRIPT = CONVERT_MARKDOWN_DIR / "scripts" / "convert_markonverter.py"
-# 虚拟环境 Python 路径（用于调用 convert-markdown 脚本，确保依赖正确加载）
-# batch_convert.py 位于 document-organizer/scripts/，所以向上两级到 document-organizer/
-VENV_PYTHON = Path(__file__).parent.parent / ".venv" / "bin" / "python"
-
-def get_convert_markdown_script():
-    if CONVERT_MARKDOWN_SCRIPT.exists():
-        return str(CONVERT_MARKDOWN_SCRIPT)
+def get_markitdown_command():
+    """返回 markitdown 命令路径"""
+    try:
+        # 尝试在 PATH 中查找 markitdown
+        result = subprocess.run(["markitdown", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return "markitdown"
+    except FileNotFoundError:
+        pass
+    
+    # 尝试使用 python -m markitdown
+    try:
+        result = subprocess.run([sys.executable, "-m", "markitdown", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return [sys.executable, "-m", "markitdown"]
+    except Exception:
+        pass
+    
     return None
-
-def get_python_executable():
-    """返回用于执行 convert-markdown 脚本的 Python 解释器路径
-    优先使用 document-organizer 虚拟环境的 Python，确保依赖一致"""
-    if VENV_PYTHON.exists():
-        return str(VENV_PYTHON)
-    # 回退到当前 Python（仅当虚拟环境不存在时）
-    return sys.executable
 
 def find_libreoffice():
     """自动查找 LibreOffice 安装路径"""
@@ -255,15 +256,13 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
     return success, failed
 
 def convert_modern(by_dir, file_type, label, output_dir, all_failed):
-    """使用 convert-markdown 技能转换现代格式（.xlsx, .pptx, .docx）"""
+    """使用 markitdown 转换现代格式（.xlsx, .pptx, .docx）"""
     success = 0
     
-    convert_script = get_convert_markdown_script()
-    if not convert_script:
-        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 {label} 转换")
+    markitdown_cmd = get_markitdown_command()
+    if not markitdown_cmd:
+        print(f"  ⚠️ 未找到 markitdown 命令，请安装: pip install markitdown[docx,xlsx,pdf]")
         return success
-
-    python_exe = get_python_executable()
 
     for parent_dir, files in by_dir.items():
         if not files:
@@ -275,12 +274,12 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
             for src_file in files:
                 if src_file.suffix.lower() == file_type:
                     output_file = output_subdir / src_file.with_suffix('.md').name
-                    cmd = [
-                        python_exe,
-                        convert_script,
-                        str(src_file),
-                        "-o", str(output_file)
-                    ]
+                    # 构建命令
+                    if isinstance(markitdown_cmd, str):
+                        cmd = [markitdown_cmd, str(src_file), "-o", str(output_file)]
+                    else:
+                        cmd = markitdown_cmd + [str(src_file), "-o", str(output_file)]
+                    
                     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                     if result.returncode == 0:
                         success += 1
@@ -297,17 +296,15 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
     return success
 
 def convert_pdfs(by_dir, output_dir):
-    """批量转换 .pdf 文件 - 使用 convert-markdown 技能"""
+    """批量转换 .pdf 文件 - 使用 markitdown"""
     print(f"\n[步骤 6] PDF 文档转换 (.pdf → .md)")
     success = 0
     failed = []
     
-    convert_script = get_convert_markdown_script()
-    if not convert_script:
-        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 PDF 转换")
+    markitdown_cmd = get_markitdown_command()
+    if not markitdown_cmd:
+        print(f"  ⚠️ 未找到 markitdown 命令，请安装: pip install markitdown[docx,xlsx,pdf]")
         return success, failed
-
-    python_exe = get_python_executable()
 
     for parent_dir, files in by_dir.items():
         if not files:
@@ -318,17 +315,17 @@ def convert_pdfs(by_dir, output_dir):
         for src_file in files:
             try:
                 output_file = output_subdir / src_file.with_suffix('.md').name
-                cmd = [
-                    python_exe,
-                    convert_script,
-                    str(src_file),
-                    "-o", str(output_file)
-                ]
+                # 构建命令
+                if isinstance(markitdown_cmd, str):
+                    cmd = [markitdown_cmd, str(src_file), "-o", str(output_file)]
+                else:
+                    cmd = markitdown_cmd + [str(src_file), "-o", str(output_file)]
+                
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                 if result.returncode == 0:
                     success += 1
                 else:
-                    failed.append((str(src_file), f"Exit {result.returncode}: {result.stderr}"))
+                    failed.append((str(src_file), f"Exit {result.returncode}: {result.stderr.strip() or result.stdout.strip()}"))
             except Exception as e:
                 failed.append((str(src_file), str(e)))
 

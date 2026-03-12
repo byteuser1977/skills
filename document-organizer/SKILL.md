@@ -275,6 +275,12 @@ npx skills run document-organizer --source "docs" --filter "00_模板/*.doc"
 
 ## 版本历史
 
+- **v1.0.4** (2026-03-12)
+  - 修复：移除对不存在的外部 convert-markdown 目录和脚本的依赖
+  - 修复：移除对特定路径虚拟环境的依赖
+  - 优化：直接使用 markitdown 命令行工具进行转换
+  - 优化：增加 markitdown 命令的自动检测逻辑
+
 - **v1.0.3** (2026-03-12)
   - 修复：移除不存在的 `--temp-dir` 参数
   - 更新：完善所有支持的文件类型说明
@@ -295,6 +301,6 @@ npx skills run document-organizer --source "docs" --filter "00_模板/*.doc"
 
 ---
 
-**最后更新**: 2026-03-11  
+**最后更新**: 2026-03-12  
 **适用平台**: Windows/Linux/macOS (需 LibreOffice)  
 **许可证**: MIT

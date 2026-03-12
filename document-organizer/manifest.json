@@ -1,6 +1,6 @@
 {
   "name": "document-organizer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "批量文档转换技能：将 Office 文档和 PDF 高质量转换为 Markdown",
   "author": "byteuser",
   "dependencies": {
@@ -96,6 +96,15 @@
     "note": "实际速度取决于硬件和文件复杂度"
   },
   "changelog": {
+    "1.0.4": {
+      "date": "2026-03-12",
+      "changes": [
+        "修复：移除对不存在的外部 convert-markdown 目录和脚本的依赖",
+        "修复：移除对特定路径虚拟环境的依赖",
+        "优化：直接使用 markitdown 命令行工具进行转换",
+        "优化：增加 markitdown 命令的自动检测逻辑"
+      ]
+    },
     "1.0.3": {
       "date": "2026-03-12",
       "changes": [
