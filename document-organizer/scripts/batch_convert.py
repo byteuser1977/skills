@@ -18,11 +18,22 @@ import json
 
 CONVERT_MARKDOWN_DIR = Path(__file__).parent.parent.parent / "convert-markdown"
 CONVERT_MARKDOWN_SCRIPT = CONVERT_MARKDOWN_DIR / "scripts" / "convert_markonverter.py"
+# 虚拟环境 Python 路径（用于调用 convert-markdown 脚本，确保依赖正确加载）
+# batch_convert.py 位于 document-organizer/scripts/，所以向上两级到 document-organizer/
+VENV_PYTHON = Path(__file__).parent.parent / ".venv" / "bin" / "python"
 
 def get_convert_markdown_script():
     if CONVERT_MARKDOWN_SCRIPT.exists():
         return str(CONVERT_MARKDOWN_SCRIPT)
     return None
+
+def get_python_executable():
+    """返回用于执行 convert-markdown 脚本的 Python 解释器路径
+    优先使用 document-organizer 虚拟环境的 Python，确保依赖一致"""
+    if VENV_PYTHON.exists():
+        return str(VENV_PYTHON)
+    # 回退到当前 Python（仅当虚拟环境不存在时）
+    return sys.executable
 
 def find_libreoffice():
     """自动查找 LibreOffice 安装路径"""
@@ -252,6 +263,8 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
         print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 {label} 转换")
         return success
 
+    python_exe = get_python_executable()
+
     for parent_dir, files in by_dir.items():
         if not files:
             continue
@@ -263,7 +276,7 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
                 if src_file.suffix.lower() == file_type:
                     output_file = output_subdir / src_file.with_suffix('.md').name
                     cmd = [
-                        sys.executable,
+                        python_exe,
                         convert_script,
                         str(src_file),
                         "-o", str(output_file)
@@ -294,6 +307,8 @@ def convert_pdfs(by_dir, output_dir):
         print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 PDF 转换")
         return success, failed
 
+    python_exe = get_python_executable()
+
     for parent_dir, files in by_dir.items():
         if not files:
             continue
@@ -304,7 +319,7 @@ def convert_pdfs(by_dir, output_dir):
             try:
                 output_file = output_subdir / src_file.with_suffix('.md').name
                 cmd = [
-                    sys.executable,
+                    python_exe,
                     convert_script,
                     str(src_file),
                     "-o", str(output_file)
