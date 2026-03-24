@@ -1,0 +1,17 @@
+{
+  "providers": ["bing", "sogou"],
+  "maxResults": 10,
+  "snippetLength": 150,
+  "cacheTtlMinutes": 5,
+  "tavily": {
+    "apiKey": null,
+    "searchDepth": "basic",
+    "maxResults": 10,
+    "timeRange": null,
+    "includeRawContent": null
+  },
+  "sogou": {
+    "maxResults": 10,
+    "ie": "utf8"
+  }
+}

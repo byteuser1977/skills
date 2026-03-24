@@ -1,0 +1,63 @@
+{
+  "name": "web-search-multi",
+  "version": "1.1.0",
+  "description": "Multi-provider web search skill for OpenClaw (Bing + Sogou + Tavily)",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./tool": "./src/tool.js"
+  },
+  "bin": {
+    "web-search-multi": "./bin/web-search-multi.js"
+  },
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "test": "node bin/web-search-multi.js '{\"query\":\"OpenClaw AI\",\"count\":10}'",
+    "test:raw": "echo '{\"query\":\"test\",\"count\":5}' | node bin/web-search-multi.js",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm test"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "node-html-parser": "^6.1.13",
+    "ofetch": "^1.4.3",
+    "undici": "^7.24.4"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.3.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "openclaw",
+    "skill",
+    "web-search",
+    "multi-provider",
+    "bing",
+    "sogou",
+    "tavily",
+    "ai",
+    "agent"
+  ],
+  "author": "Peter Steinberger & OpenClaw Community",
+  "contributors": [
+    "Peter Steinberger (https://steipete.me)"
+  ],
+  "homepage": "https://github.com/openclaw/openclaw",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openclaw/openclaw.git",
+    "directory": "skills/web-search-multi"
+  },
+  "bugs": {
+    "url": "https://github.com/openclaw/openclaw/issues"
+  },
+  "license": "MIT"
+}
