@@ -39,6 +39,16 @@
 - OCR 文本识别和音频转录
 - NPX CLI 支持，可直接通过 `npx convert-markdown` 调用
 
+**运行环境：**
+- Python 3.10+（必需）
+- Node.js 14.0+（必需）
+- Tesseract OCR（可选，用于 PDF OCR）
+- FFmpeg（可选，用于音频转录）
+
+**版本信息：**
+- 当前版本：1.1.0
+- 基于：Microsoft MarkItDown 0.1.5+
+
 **路径：** [convert-markdown/](convert-markdown/)
 
 ---
@@ -139,7 +149,13 @@ node bin/web-search-multi.js '{"query":"OpenClaw AI","count":10}'
 
 ## ⚠️ 注意事项
 
-- 部分技能需要安装额外的系统依赖（如 LibreOffice）
-- 请确保已安装 Python 3.10+ 和 Node.js 环境
-- 使用前请阅读各技能的详细文档
+### 环境依赖
+- **convert-markdown**：需要 Python 3.10+ 和 Node.js 14.0+ 运行环境
+- **document-organizer**：需要安装 LibreOffice（用于旧版 Office 文档转换）
+- 部分技能需要安装额外的系统依赖（如 Tesseract OCR、FFmpeg）
+
+### 使用建议
+- 使用前请阅读各技能的详细文档（SKILL.md）
 - 网页搜索技能请注意请求频率限制
+- OCR 和音频转录功能需要额外安装依赖
+- 大文件处理可能需要较长时间
