@@ -1,6 +1,6 @@
 # Skills 技能库
 
-本仓库包含多个实用的自动化技能，用于文档处理、数据搜索和知识库管理等场景。
+本仓库包含多个实用的自动化技能，用于文档处理、数据搜索、知识库管理和网页搜索等场景。
 
 ## 📚 技能列表
 
@@ -11,6 +11,7 @@
 - Word/Excel/PowerPoint 文档转换为 Markdown
 - 批量处理，保持原目录结构
 - 完美保留标题层级、表格结构、样式格式
+- 支持 PDF 文档转换
 
 **路径：** [document-organizer/](document-organizer/)
 
@@ -36,7 +37,7 @@
 - 支持 PDF、Word、PPT、Excel、图片、音频等格式
 - 结构化保留：标题、列表、表格、链接
 - OCR 文本识别和音频转录
-- 批量处理和目录递归转换
+- NPX CLI 支持，可直接通过 `npx convert-markdown` 调用
 
 **路径：** [convert-markdown/](convert-markdown/)
 
@@ -53,6 +54,21 @@
 
 **路径：** [search-kb/](search-kb/)
 
+---
+
+### 5. web-search-multi - 多提供商网页搜索技能
+多 provider 并行搜索技能，支持 Bing、Sogou、Tavily 等提供商并行搜索和结果合并。
+
+**核心能力：**
+- 多 provider 并行搜索（Bing + Sogou + Tavily）
+- 轮询合并策略，智能去重
+- 内存缓存（5分钟 TTL）
+- OpenClaw Tool Calling 兼容
+
+**路径：** [web-search-multi/](web-search-multi/)
+
+---
+
 ## 🚀 快速开始
 
 每个技能目录下都包含详细的 SKILL.md 文档，请进入对应目录查看：
@@ -61,42 +77,69 @@
 # 查看技能详情
 cat document-organizer/SKILL.md
 cat gaokao-search/SKILL.md
-cat markitdown/SKILL.md
+cat convert-markdown/SKILL.md
 cat search-kb/SKILL.md
+cat web-search-multi/SKILL.md
 ```
 
 ## 📁 项目结构
 
 ```
 skills/
-├── document-organizer/    # 文档整理技能
-│   ├── scripts/           # 处理脚本
-│   ├── SKILL.md           # 技能文档
-│   └── README.md          # 使用说明
-├── gaokao-search/         # 高考志愿搜索技能
-│   ├── scripts/           # Python 脚本
-│   ├── references/        # 参考数据
-│   └── SKILL.md           # 技能文档
-├── convert-markdown/      # 文档转换技能
-│   ├── scripts/           # 转换脚本
-│   ├── references/        # API 参考
-│   └── SKILL.md           # 技能文档
-├── search-kb/             # 知识库搜索技能
-│   ├── bin/               # 可执行文件
-│   ├── lib/               # 核心库
-│   └── SKILL.md           # 技能文档
-└── README.md              # 本文件
+├── document-organizer/      # 文档整理技能
+│   ├── scripts/             # 处理脚本
+│   ├── SKILL.md             # 技能文档
+│   └── README.md            # 使用说明
+├── gaokao-search/           # 高考志愿搜索技能
+│   ├── scripts/             # Python 脚本
+│   ├── references/          # 参考数据
+│   └── SKILL.md             # 技能文档
+├── convert-markdown/         # 文档转换技能
+│   ├── bin/                 # NPX CLI 入口
+│   ├── scripts/             # 转换脚本
+│   ├── references/          # API 参考
+│   ├── package.json         # Node.js 包配置
+│   └── SKILL.md             # 技能文档
+├── search-kb/               # 知识库搜索技能
+│   ├── bin/                 # 可执行文件
+│   ├── lib/                 # 核心库
+│   └── SKILL.md             # 技能文档
+├── web-search-multi/        # 网页搜索技能
+│   ├── bin/                 # CLI 入口
+│   ├── src/                 # 源代码
+│   └── SKILL.md             # 技能文档
+└── README.md                # 本文件
 ```
 
 ## 📝 使用说明
 
-1. 进入需要使用的技能目录
-2. 阅读 SKILL.md 了解功能和使用方法
-3. 根据文档配置环境依赖
-4. 运行脚本或命令使用技能
+### convert-markdown 使用示例
+
+```bash
+# 使用 NPX CLI
+npx convert-markdown convert --input document.pdf --output document.md
+npx convert-markdown batch --source ./docs --target ./markdown
+
+# 使用 Python API
+python -c "from markitdown import MarkItDown; print(MarkItDown().convert('doc.pdf').text_content)"
+```
+
+### web-search-multi 使用示例
+
+```bash
+# 进入目录
+cd web-search-multi
+
+# 安装依赖
+npm install
+
+# 执行搜索
+node bin/web-search-multi.js '{"query":"OpenClaw AI","count":10}'
+```
 
 ## ⚠️ 注意事项
 
 - 部分技能需要安装额外的系统依赖（如 LibreOffice）
 - 请确保已安装 Python 3.10+ 和 Node.js 环境
 - 使用前请阅读各技能的详细文档
+- 网页搜索技能请注意请求频率限制
