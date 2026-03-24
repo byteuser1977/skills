@@ -1,6 +1,6 @@
 {
   "name": "document-organizer",
-  "version": "1.1.0",
+  "version": "1.0.4",
   "description": "批量文档转换技能：将旧版 Office 文档转换为 Markdown",
   "main": "scripts/batch_convert.py",
   "bin": {

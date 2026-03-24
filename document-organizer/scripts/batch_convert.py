@@ -16,12 +16,24 @@ from datetime import datetime
 import sys
 import json
 
-CONVERT_MARKDOWN_DIR = Path(__file__).parent.parent.parent / "convert-markdown"
-CONVERT_MARKDOWN_SCRIPT = CONVERT_MARKDOWN_DIR / "scripts" / "convert_markonverter.py"
-
-def get_convert_markdown_script():
-    if CONVERT_MARKDOWN_SCRIPT.exists():
-        return str(CONVERT_MARKDOWN_SCRIPT)
+def get_markitdown_command():
+    """返回 markitdown 命令路径"""
+    try:
+        # 尝试在 PATH 中查找 markitdown
+        result = subprocess.run(["markitdown", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return "markitdown"
+    except FileNotFoundError:
+        pass
+    
+    # 尝试使用 python -m markitdown
+    try:
+        result = subprocess.run([sys.executable, "-m", "markitdown", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            return [sys.executable, "-m", "markitdown"]
+    except Exception:
+        pass
+    
     return None
 
 def find_libreoffice():
@@ -146,23 +158,36 @@ def convert_excels(by_dir, source_dir, output_dir, soffice_path, temp_root, all_
         temp_subdir = temp_root / "excels" / parent_dir
         temp_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 复制
+        # 复制文件到临时目录
         for src_file in files:
             dest = temp_subdir / src_file.name
-            shutil.copy2(src_file, dest)
+            try:
+                shutil.copy2(src_file, dest)
+            except Exception as e:
+                print(f"    [WARN] 复制失败 {src_file.name}: {e}")
+                continue
 
         # 批量转 .xlsx（只对 .xls 文件）
         xls_files = [f for f in temp_subdir.glob("*.xls")]
         if xls_files:
+            # 使用通配符方式（LibreOffice 支持自动展开）
             cmd = [soffice_path, "--headless", "--convert-to", "xlsx", "--outdir", str(temp_subdir), str(temp_subdir / "*.xls")]
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+                print(f"    [DEBUG] CMD: {' '.join(cmd)}")
+                print(f"    [DEBUG] 处理 {len(xls_files)} 个 .xls 文件: {[f.name for f in xls_files]}")
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)  # 增加超时
                 if result.returncode != 0:
-                    failed.append((parent_dir, "LibreOffice failed"))
+                    error_msg = f"LibreOffice exit {result.returncode}: {result.stderr or result.stdout}"
+                    print(f"    [ERROR] {error_msg}")
+                    failed.append((parent_dir, error_msg))
                     shutil.rmtree(temp_subdir, ignore_errors=True)
                     continue
+                else:
+                    print(f"    [OK] LibreOffice 完成，输出 {len(list(temp_subdir.glob('*.xlsx')))} 个 .xlsx")
             except subprocess.TimeoutExpired:
-                failed.append((parent_dir, "Timeout"))
+                error_msg = "LibreOffice timeout (600s)"
+                print(f"    [ERROR] {error_msg}")
+                failed.append((parent_dir, error_msg))
                 shutil.rmtree(temp_subdir, ignore_errors=True)
                 continue
 
@@ -193,14 +218,19 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
         temp_subdir = temp_root / "presentations" / parent_dir
         temp_subdir.mkdir(parents=True, exist_ok=True)
 
-        # 复制
+        # 复制文件到临时目录
         for src_file in files:
             dest = temp_subdir / src_file.name
-            shutil.copy2(src_file, dest)
+            try:
+                shutil.copy2(src_file, dest)
+            except Exception as e:
+                print(f"    [WARN] 复制失败 {src_file.name}: {e}")
+                continue
 
         # 转 .pptx (只对 .ppt)
         ppt_files = [f for f in temp_subdir.glob("*.ppt")]
         if ppt_files:
+            # 使用通配符方式（LibreOffice 支持自动展开）
             cmd = [soffice_path, "--headless", "--convert-to", "pptx", "--outdir", str(temp_subdir), str(temp_subdir / "*.ppt")]
             try:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -226,12 +256,12 @@ def convert_presentations(by_dir, source_dir, output_dir, soffice_path, temp_roo
     return success, failed
 
 def convert_modern(by_dir, file_type, label, output_dir, all_failed):
-    """使用 convert-markdown 技能转换现代格式（.xlsx, .pptx, .docx）"""
+    """使用 markitdown 转换现代格式（.xlsx, .pptx, .docx）"""
     success = 0
     
-    convert_script = get_convert_markdown_script()
-    if not convert_script:
-        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 {label} 转换")
+    markitdown_cmd = get_markitdown_command()
+    if not markitdown_cmd:
+        print(f"  ⚠️ 未找到 markitdown 命令，请安装: pip install markitdown[docx,xlsx,pdf]")
         return success
 
     for parent_dir, files in by_dir.items():
@@ -244,17 +274,19 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
             for src_file in files:
                 if src_file.suffix.lower() == file_type:
                     output_file = output_subdir / src_file.with_suffix('.md').name
-                    cmd = [
-                        sys.executable,
-                        convert_script,
-                        str(src_file),
-                        "-o", str(output_file)
-                    ]
+                    # 构建命令
+                    if isinstance(markitdown_cmd, str):
+                        cmd = [markitdown_cmd, str(src_file), "-o", str(output_file)]
+                    else:
+                        cmd = markitdown_cmd + [str(src_file), "-o", str(output_file)]
+                    
                     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                     if result.returncode == 0:
                         success += 1
                     else:
-                        all_failed.append((str(src_file), file_type, f"Exit {result.returncode}: {result.stderr}"))
+                        error_msg = f"Exit {result.returncode}: {result.stderr.strip() or result.stdout.strip()}"
+                        all_failed.append((str(src_file), file_type, error_msg))
+                        print(f"    [DEBUG] {src_file.name} 失败: {error_msg}")
 
         except Exception as e:
             all_failed.append((parent_dir, file_type, str(e)))
@@ -264,14 +296,14 @@ def convert_modern(by_dir, file_type, label, output_dir, all_failed):
     return success
 
 def convert_pdfs(by_dir, output_dir):
-    """批量转换 .pdf 文件 - 使用 convert-markdown 技能"""
+    """批量转换 .pdf 文件 - 使用 markitdown"""
     print(f"\n[步骤 6] PDF 文档转换 (.pdf → .md)")
     success = 0
     failed = []
     
-    convert_script = get_convert_markdown_script()
-    if not convert_script:
-        print(f"  ⚠️ 未找到 convert-markdown 脚本，跳过 PDF 转换")
+    markitdown_cmd = get_markitdown_command()
+    if not markitdown_cmd:
+        print(f"  ⚠️ 未找到 markitdown 命令，请安装: pip install markitdown[docx,xlsx,pdf]")
         return success, failed
 
     for parent_dir, files in by_dir.items():
@@ -283,17 +315,17 @@ def convert_pdfs(by_dir, output_dir):
         for src_file in files:
             try:
                 output_file = output_subdir / src_file.with_suffix('.md').name
-                cmd = [
-                    sys.executable,
-                    convert_script,
-                    str(src_file),
-                    "-o", str(output_file)
-                ]
+                # 构建命令
+                if isinstance(markitdown_cmd, str):
+                    cmd = [markitdown_cmd, str(src_file), "-o", str(output_file)]
+                else:
+                    cmd = markitdown_cmd + [str(src_file), "-o", str(output_file)]
+                
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
                 if result.returncode == 0:
                     success += 1
                 else:
-                    failed.append((str(src_file), f"Exit {result.returncode}: {result.stderr}"))
+                    failed.append((str(src_file), f"Exit {result.returncode}: {result.stderr.strip() or result.stdout.strip()}"))
             except Exception as e:
                 failed.append((str(src_file), str(e)))
 

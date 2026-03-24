@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 # 指向实际的处理脚本
-CONVERTER_SCRIPT = Path(__file__).parent.parent / "convert-markdown" / "scripts" / "convert_markonverter.py"
+CONVERTER_SCRIPT = Path(__file__).parent / "convert_markonverter.py"
 
 def cmd_convert(args):
     """转换单个文件或目录"""

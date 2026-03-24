@@ -10,7 +10,7 @@ const args = process.argv.slice(2);
 
 if (args.length === 0) {
     console.log(`
-convert-markdown v1.0.2 - 多格式文档转换工具
+convert-markdown v1.0.3 - 多格式文档转换工具
 
 用法:
   npx convert-markdown <command> [options]

@@ -1,6 +1,6 @@
 {
   "name": "convert-markdown",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "基于 MarkItDown 的多格式文档转换技能，支持 PDF、Word、PowerPoint、Excel 等批量转 Markdown",
   "author": "Microsoft + OpenClaw Community",
   "dependencies": {
