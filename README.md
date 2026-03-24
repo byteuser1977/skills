@@ -30,7 +30,28 @@
 
 ---
 
-### 3. convert-markdown - 文档转换技能
+### 3. aidlux-openclaw - AidLux OpenClaw 网关管理技能
+AidLux 环境下 OpenClaw Gateway 的自启动配置和环境检测工具。
+
+**核心能力：**
+- 自启动服务安装（生成 /etc/aidlux/3.sh 和 rc?.d 符号链接）
+- 系统环境检测（检测命令路径并保存到 memory）
+- 守护进程配置和管理
+
+**运行环境：**
+- AidLux 系统（Android/Termux）
+- Node.js 24.14.0+
+- OpenClaw Gateway
+
+**版本信息：**
+- 当前版本：1.0.0
+- 许可证：MIT
+
+**路径：** [aidlux-openclaw/](aidlux-openclaw/)
+
+---
+
+### 4. convert-markdown - 文档转换技能
 基于 Microsoft MarkItDown 工具，支持多种格式文件批量转换为 Markdown。
 
 **核心能力：**
@@ -53,7 +74,7 @@
 
 ---
 
-### 4. search-kb - 知识库搜索技能
+### 5. search-kb - 知识库搜索技能
 高性能全文搜索技能，支持在大量 Markdown 文档中快速检索内容。
 
 **核心能力：**
@@ -66,7 +87,7 @@
 
 ---
 
-### 5. web-search-multi - 多提供商网页搜索技能
+### 6. web-search-multi - 多提供商网页搜索技能
 多 provider 并行搜索技能，支持 Bing、Sogou、Tavily 等提供商并行搜索和结果合并。
 
 **核心能力：**
@@ -87,6 +108,7 @@
 # 查看技能详情
 cat document-organizer/SKILL.md
 cat gaokao-search/SKILL.md
+cat aidlux-openclaw/SKILL.md
 cat convert-markdown/SKILL.md
 cat search-kb/SKILL.md
 cat web-search-multi/SKILL.md
