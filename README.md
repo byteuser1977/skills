@@ -100,6 +100,24 @@ AidLux 环境下 OpenClaw Gateway 的自启动配置和环境检测工具。
 
 ---
 
+### 7. hermes-team-orchestration - 多智能体团队编排技能
+基于 Hermes 的多智能体团队编排框架，支持任务路由、生命周期管理和质量门禁。
+
+**核心能力：**
+- 任务规划：将复杂请求拆分为结构化任务
+- 智能路由：根据角色和能力分配任务到合适的智能体
+- 生命周期管理：跟踪任务阶段（Plan → Build → Review → Done）
+- 质量门禁：任务完成前必须经过评审
+- 工件管理：团队输出的共享工作空间
+
+**版本信息：**
+- 当前版本：1.0.0
+- 许可证：MIT
+
+**路径：** [hermes-team-orchestration/](hermes-team-orchestration/)
+
+---
+
 ## 🚀 快速开始
 
 每个技能目录下都包含详细的 SKILL.md 文档，请进入对应目录查看：
@@ -112,35 +130,44 @@ cat aidlux-openclaw/SKILL.md
 cat convert-markdown/SKILL.md
 cat search-kb/SKILL.md
 cat web-search-multi/SKILL.md
+cat hermes-team-orchestration/SKILL.md
 ```
 
 ## 📁 项目结构
 
 ```
 skills/
-├── document-organizer/      # 文档整理技能
-│   ├── scripts/             # 处理脚本
-│   ├── SKILL.md             # 技能文档
-│   └── README.md            # 使用说明
-├── gaokao-search/           # 高考志愿搜索技能
-│   ├── scripts/             # Python 脚本
-│   ├── references/          # 参考数据
-│   └── SKILL.md             # 技能文档
-├── convert-markdown/         # 文档转换技能
-│   ├── bin/                 # NPX CLI 入口
-│   ├── scripts/             # 转换脚本
-│   ├── references/          # API 参考
-│   ├── package.json         # Node.js 包配置
-│   └── SKILL.md             # 技能文档
-├── search-kb/               # 知识库搜索技能
-│   ├── bin/                 # 可执行文件
-│   ├── lib/                 # 核心库
-│   └── SKILL.md             # 技能文档
-├── web-search-multi/        # 网页搜索技能
-│   ├── bin/                 # CLI 入口
-│   ├── src/                 # 源代码
-│   └── SKILL.md             # 技能文档
-└── README.md                # 本文件
+├── document-organizer/           # 文档整理技能
+│   ├── scripts/                 # 处理脚本
+│   ├── SKILL.md                 # 技能文档
+│   └── README.md                # 使用说明
+├── gaokao-search/               # 高考志愿搜索技能
+│   ├── scripts/                 # Python 脚本
+│   ├── references/             # 参考数据
+│   └── SKILL.md                 # 技能文档
+├── aidlux-openclaw/             # AidLux 网关管理技能
+│   ├── index.cjs                # 入口文件
+│   └── SKILL.md                 # 技能文档
+├── convert-markdown/            # 文档转换技能
+│   ├── bin/                     # NPX CLI 入口
+│   ├── scripts/                 # 转换脚本
+│   ├── references/             # API 参考
+│   ├── package.json             # Node.js 包配置
+│   └── SKILL.md                 # 技能文档
+├── search-kb/                   # 知识库搜索技能
+│   ├── bin/                     # 可执行文件
+│   ├── lib/                     # 核心库
+│   └── SKILL.md                 # 技能文档
+├── web-search-multi/            # 网页搜索技能
+│   ├── bin/                     # CLI 入口
+│   ├── src/                     # 源代码
+│   └── SKILL.md                 # 技能文档
+├── hermes-team-orchestration/   # 多智能体团队编排技能
+│   ├── hermes_team_orchestration.py  # 核心库
+│   ├── tools/                   # 工具脚本
+│   ├── config.yaml.template     # 配置模板
+│   └── SKILL.md                 # 技能文档
+└── README.md                     # 本文件
 ```
 
 ## 📝 使用说明
@@ -167,6 +194,31 @@ npm install
 
 # 执行搜索
 node bin/web-search-multi.js '{"query":"OpenClaw AI","count":10}'
+```
+
+### hermes-team-orchestration 使用示例
+
+```python
+from hermes_tools import hermes_team_orchestration as hto
+
+# 定义团队配置
+team_config = {
+    "orchestrator": {
+        "model": {"provider": "openrouter", "model": "anthropic/claude-3.5-sonnet"},
+        "role": "Route tasks, track state, make priority calls"
+    },
+    "builder": {
+        "model": {"provider": "openrouter", "model": "anthropic/claude-3.5-haiku"},
+        "role": "Implement features, produce artifacts"
+    }
+}
+
+# 初始化团队
+hto.init_team(team_config, workspace="/path/to/workspace")
+
+# 创建并分配任务
+task = hto.create_task(title="Implement user authentication", description="Add JWT-based login", category="CODE")
+hto.assign_task(task, assignee="builder")
 ```
 
 ## ⚠️ 注意事项
