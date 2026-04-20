@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "category": "CODE",
+      "subcategory": null,
+      "preferred_agent": "builder",
+      "required_tools": ["terminal", "file", "code_execution"],
+      "fallback_agent": "orchestrator",
+      "description": "Implementation tasks go to builder"
+    },
+    {
+      "category": "DOCS",
+      "subcategory": null,
+      "preferred_agent": "orchestrator",
+      "required_tools": ["file"],
+      "fallback_agent": "builder",
+      "description": "Documentation tasks"
+    },
+    {
+      "category": "RESEARCH",
+      "subcategory": null,
+      "preferred_agent": "orchestrator",
+      "required_tools": ["web", "search"],
+      "fallback_agent": "builder",
+      "description": "Research and data gathering"
+    },
+    {
+      "category": "PLAN",
+      "subcategory": null,
+      "preferred_agent": "orchestrator",
+      "required_tools": ["file", "session_search"],
+      "fallback_agent": null,
+      "description": "Architecture and planning goes to orchestrator"
+    },
+    {
+      "category": "REVIEW",
+      "subcategory": null,
+      "preferred_agent": "reviewer",
+      "required_tools": ["file"],
+      "fallback_agent": "orchestrator",
+      "description": "Explicit review tasks"
+    }
+  ],
+  "fallback": {
+    "default_agent": "orchestrator"
+  },
+  "notes": "Place in .hermes-team/routing.json to override defaults"
+}

@@ -1,0 +1,45 @@
+# Hermes Team Orchestration - Team Configuration
+
+# This file defines the team agents, their roles, and models.
+# Place in: .hermes-team/config.yaml
+
+# Team composition — one entry per agent
+agents:
+  orchestrator:
+    model:
+      provider: "anthropic"
+      model: "claude-3-5-sonnet-latest"
+    toolsets:
+      - "file"
+      - "session_search"
+      - "plan"
+    role: |
+      Orchestrator — routes tasks, tracks lifecycle, final approval, reporting.
+      Never executes implementation work directly unless absolutely necessary.
+
+  builder:
+    model:
+      provider: "openrouter"
+      model: "anthropic/claude-3.5-sonnet"
+    toolsets:
+      - "terminal"
+      - "file"
+      - "code_execution"
+    role: |
+      Builder — implements features, produces artifacts in shared/ directory.
+      Follows TDD: write tests first, then code.
+
+  reviewer:
+    model:
+      provider: "openrouter"
+      model: "openai/gpt-4.1"
+    toolsets:
+      - "file"
+    role: |
+      Reviewer — verifies quality, security, performance, and compliance.
+      Must approve tasks before marking DONE.
+
+# Shared workspace settings
+shared_dir: "shared"      # where artifacts live
+agents_dir: "agents"      # agent private workspaces
+max_workers: 3            # parallel tasks limit
