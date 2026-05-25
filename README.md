@@ -1,6 +1,6 @@
 # Skills 技能库
 
-本仓库包含多个实用的自动化技能，用于文档处理、数据搜索、知识库管理和网页搜索等场景。
+本仓库包含多个实用的自动化技能，用于文档处理、数据搜索、知识库管理、网页搜索和主题生成等场景。
 
 ## 📚 技能列表
 
@@ -118,6 +118,26 @@ AidLux 环境下 OpenClaw Gateway 的自启动配置和环境检测工具。
 
 ---
 
+### 8. colamd-themes - ColaMD 主题生成技能
+从网页、Word 文档或 PDF 提取视觉样式，自动生成符合 v3.0 范式的 ColaMD CSS 主题文件。内置 WCAG 对比度验证、15 种颜色系统、Mermaid 图表预设。
+
+**核心能力：**
+- URL/DOCX/PDF 格式提取（字体、大小、颜色、行高）
+- v3.0 范式主题生成（5 种子颜色 + 3 种字体栈，≤300 行）
+- WCAG 2.1 对比度自动验证（AAA/AA）
+- 智能配色匹配（15 种内置颜色系统）
+- Mermaid 图表 20 变量自动生成
+- 主题列表、验证、审计功能
+
+**运行环境：**
+- Node.js ≥ 18
+- 依赖外部项目：`/mnt/d/workspace/git/ColaMD-themes`
+- 需预先运行：`npm install && npm run build`
+
+**路径：** [colamd-themes/](colamd-themes/)
+
+---
+
 ## 🚀 快速开始
 
 每个技能目录下都包含详细的 SKILL.md 文档，请进入对应目录查看：
@@ -131,6 +151,7 @@ cat convert-markdown/SKILL.md
 cat search-kb/SKILL.md
 cat web-search-multi/SKILL.md
 cat hermes-team-orchestration/SKILL.md
+cat colamd-themes/SKILL.md
 ```
 
 ## 📁 项目结构
@@ -166,6 +187,12 @@ skills/
 │   ├── hermes_team_orchestration.py  # 核心库
 │   ├── tools/                   # 工具脚本
 │   ├── config.yaml.template     # 配置模板
+│   ├── example_minimal.py       # 最小示例
+│   ├── example_gaokao.py        # 高考志愿示例
+│   └── SKILL.md                 # 技能文档
+├── colamd-themes/               # ColaMD 主题生成技能
+│   ├── scripts/                 # wrapper 脚本
+│   ├── manifest.json            # 技能清单
 │   └── SKILL.md                 # 技能文档
 └── README.md                     # 本文件
 ```
@@ -221,11 +248,28 @@ task = hto.create_task(title="Implement user authentication", description="Add J
 hto.assign_task(task, assignee="builder")
 ```
 
+### colamd-themes 使用示例
+
+```bash
+# 从 Word 文档提取并自动匹配配色
+cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts extract ./report.docx -n "corporate" -A
+
+# 从网页提取并指定 Morandi 配色
+cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts from-url https://example.com -n "web-theme" --color-system sage-green
+
+# 列出现有主题
+cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts list
+
+# 验证主题合规性
+cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts validate themes/my-theme.css
+```
+
 ## ⚠️ 注意事项
 
 ### 环境依赖
 - **convert-markdown**：需要 Python 3.10+ 和 Node.js 14.0+ 运行环境
 - **document-organizer**：需要安装 LibreOffice（用于旧版 Office 文档转换）
+- **colamd-themes**：需要 Node.js ≥ 18 和外部项目 ColaMD-themes
 - 部分技能需要安装额外的系统依赖（如 Tesseract OCR、FFmpeg）
 
 ### 使用建议
@@ -233,3 +277,4 @@ hto.assign_task(task, assignee="builder")
 - 网页搜索技能请注意请求频率限制
 - OCR 和音频转录功能需要额外安装依赖
 - 大文件处理可能需要较长时间
+- colamd-themes 需要在 ColaMD-themes 项目根目录下运行

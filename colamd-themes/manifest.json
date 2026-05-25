@@ -1,0 +1,100 @@
+{
+  "name": "colamd-themes",
+  "version": "1.0.0",
+  "description": "ColaMD 主题生成与管理技能，基于 ColaMD-themes CLI 工具。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件。",
+  "author": "ColaMD Community + OpenClaw",
+  "license": "MIT",
+  "dependencies": {
+    "node": ">=18",
+    "external_project": "/mnt/d/workspace/git/ColaMD-themes",
+    "required_steps": [
+      "npm install",
+      "npm run build"
+    ]
+  },
+  "config": {
+    "project_root": "/mnt/d/workspace/git/ColaMD-themes",
+    "default_themes_dir": "themes",
+    "auto_match_default": true
+  },
+  "commands": {
+    "from-url": {
+      "description": "从 URL 提取主题",
+      "usage": "colamd-themes from-url <URL> [options]",
+      "options": {
+        "--name": "主题名称",
+        "--output": "输出 CSS 文件路径",
+        "--themes-dir": "主题输出目录",
+        "--color-system": "强制颜色系统 ID",
+        "--mermaid-preset": "强制 Mermaid 预设",
+        "--auto-match": "自动匹配配色和预设"
+      }
+    },
+    "from-docx": {
+      "description": "从 DOCX 文件提取主题",
+      "usage": "colamd-themes from-docx <file.docx> [options]"
+    },
+    "from-pdf": {
+      "description": "从 PDF 文件提取主题",
+      "usage": "colamd-themes from-pdf <file.pdf> [options]"
+    },
+    "extract": {
+      "description": "自动检测源类型并提取",
+      "usage": "colamd-themes extract <source> [options]"
+    },
+    "list": {
+      "description": "列出已生成的主题",
+      "usage": "colamd-themes list [--themes-dir <dir>]"
+    },
+    "color-systems": {
+      "description": "列出内置颜色系统",
+      "usage": "colamd-themes color-systems [--json]"
+    },
+    "mermaid-presets": {
+      "description": "列出 Mermaid 预设",
+      "usage": "colamd-thems mermaid-presets [--json]"
+    },
+    "validate": {
+      "description": "验证主题是否符合 v3.0 范式",
+      "usage": "colamd-themes validate <theme.css>"
+    }
+  },
+  "examples": [
+    {
+      "description": "从 Word 文档提取并自动匹配配色",
+      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts extract ./report.docx -n \"corporate\" -A"
+    },
+    {
+      "description": "从网页提取并指定 Morandi 配色",
+      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts from-url https://example.com -n \"web-theme\" --color-system sage-green"
+    },
+    {
+      "description": "列出现有主题",
+      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts list"
+    },
+    {
+      "description": "验证主题合规性",
+      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts validate themes/my-theme.css"
+    }
+  ],
+  "scripts": {
+    "wrapper": "scripts/colamd-themes-wrapper.sh"
+  },
+  "supported_sources": [
+    "url",
+    "docx",
+    "pdf"
+  ],
+  "output_formats": [
+    "css"
+  ],
+  "tags": [
+    "colamd",
+    "theme",
+    "css",
+    "markdown",
+    "wcag",
+    "typography",
+    "mermaid"
+  ]
+}
