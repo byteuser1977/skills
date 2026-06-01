@@ -1,33 +1,33 @@
 {
   "name": "colamd-themes",
-  "version": "1.0.0",
-  "description": "ColaMD 主题生成与管理技能，基于 ColaMD-themes CLI 工具。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件。",
-  "author": "ColaMD Community + OpenClaw",
+  "version": "1.1.0",
+  "description": "ColaMD 主题生成与管理技能，基于 @bytechain.cn/colamd-themes npm 包。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件，以及将 Markdown 导出为 HTML/PDF。",
+  "author": "ColaMD Community",
   "license": "MIT",
+  "npm_package": "@bytechain.cn/colamd-themes",
   "dependencies": {
-    "node": ">=18",
-    "external_project": "/mnt/d/workspace/git/ColaMD-themes",
-    "required_steps": [
-      "npm install",
-      "npm run build"
-    ]
+    "node": ">=18"
+  },
+  "install": {
+    "global": "npm install -g @bytechain.cn/colamd-themes",
+    "npx": "npx @bytechain.cn/colamd-themes <command>"
   },
   "config": {
-    "project_root": "/mnt/d/workspace/git/ColaMD-themes",
     "default_themes_dir": "themes",
-    "auto_match_default": true
+    "auto_match_default": true,
+    "config_file": "~/.colamd-themes/config.json"
   },
   "commands": {
     "from-url": {
       "description": "从 URL 提取主题",
       "usage": "colamd-themes from-url <URL> [options]",
       "options": {
-        "--name": "主题名称",
-        "--output": "输出 CSS 文件路径",
-        "--themes-dir": "主题输出目录",
-        "--color-system": "强制颜色系统 ID",
-        "--mermaid-preset": "强制 Mermaid 预设",
-        "--auto-match": "自动匹配配色和预设"
+        "-n, --name": "主题名称",
+        "-o, --output": "输出 CSS 文件路径",
+        "-d, --themes-dir": "主题输出目录",
+        "-c, --color-system": "强制颜色系统 ID",
+        "-m, --mermaid-preset": "强制 Mermaid 预设",
+        "-A, --auto-match": "自动匹配配色和预设"
       }
     },
     "from-docx": {
@@ -42,17 +42,42 @@
       "description": "自动检测源类型并提取",
       "usage": "colamd-themes extract <source> [options]"
     },
+    "export-html": {
+      "description": "导出 Markdown 为 HTML",
+      "usage": "colamd-themes export-html <input.md> -t <theme> -o <output.html>",
+      "options": {
+        "-t, --theme": "主题名称或 CSS 文件路径",
+        "-o, --output": "输出文件路径"
+      }
+    },
+    "export-pdf": {
+      "description": "导出 Markdown 为 PDF",
+      "usage": "colamd-themes export-pdf <input.md> -t <theme> -o <output.pdf>",
+      "options": {
+        "-t, --theme": "主题名称或 CSS 文件路径",
+        "-o, --output": "输出文件路径",
+        "--format": "页面格式 (A4/Letter/A3)"
+      }
+    },
+    "export": {
+      "description": "批量导出多个文件",
+      "usage": "colamd-themes export <inputs...> --format html|pdf -t <theme> -d <dir>"
+    },
+    "set-theme": {
+      "description": "管理主题配置",
+      "usage": "colamd-themes set-theme <name> [--default|--css <file>|--remove]"
+    },
     "list": {
       "description": "列出已生成的主题",
-      "usage": "colamd-themes list [--themes-dir <dir>]"
+      "usage": "colamd-themes list [-d <dir>]"
     },
     "color-systems": {
-      "description": "列出内置颜色系统",
-      "usage": "colamd-themes color-systems [--json]"
+      "description": "列出内置颜色系统（15套）",
+      "usage": "colamd-themes color-systems [-j]"
     },
     "mermaid-presets": {
       "description": "列出 Mermaid 预设",
-      "usage": "colamd-thems mermaid-presets [--json]"
+      "usage": "colamd-themes mermaid-presets [-j]"
     },
     "validate": {
       "description": "验证主题是否符合 v3.0 范式",
@@ -61,20 +86,40 @@
   },
   "examples": [
     {
+      "description": "全局安装后使用",
+      "command": "npm install -g @bytechain.cn/colamd-themes && colamd-themes --version"
+    },
+    {
+      "description": "使用 npx 按需运行（无需安装）",
+      "command": "npx @bytechain.cn/colamd-themes color-systems"
+    },
+    {
       "description": "从 Word 文档提取并自动匹配配色",
-      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts extract ./report.docx -n \"corporate\" -A"
+      "command": "colamd-themes extract ./report.docx -n \"corporate\" -A"
     },
     {
       "description": "从网页提取并指定 Morandi 配色",
-      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts from-url https://example.com -n \"web-theme\" --color-system sage-green"
+      "command": "colamd-themes from-url https://example.com -n \"web-theme\" -c sage-green"
     },
     {
-      "description": "列出现有主题",
-      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts list"
+      "description": "导出为 HTML",
+      "command": "colamd-themes export-html doc.md -t elegant -o output.html"
+    },
+    {
+      "description": "导出为 PDF",
+      "command": "colamd-themes export-pdf doc.md -t dark -o output.pdf"
+    },
+    {
+      "description": "批量导出目录下所有 Markdown",
+      "command": "colamd-themes export docs/ --format pdf -t elegant -d output/"
+    },
+    {
+      "description": "注册自定义主题并设为默认",
+      "command": "colamd-themes set-theme my-brand --css themes/custom.css --default"
     },
     {
       "description": "验证主题合规性",
-      "command": "cd /mnt/d/workspace/git/ColaMD-themes && npx tsx src/cli.ts validate themes/my-theme.css"
+      "command": "colamd-themes validate themes/my-theme.css"
     }
   ],
   "scripts": {
@@ -86,13 +131,55 @@
     "pdf"
   ],
   "output_formats": [
-    "css"
+    "css",
+    "html",
+    "pdf"
+  ],
+  "built_in_themes": [
+    "light",
+    "dark",
+    "elegant",
+    "newsprint"
+  ],
+  "color_systems": {
+    "morandi": [
+      "morandi-pink",
+      "morandi-green",
+      "morandi-blue"
+    ],
+    "macaron": [
+      "macaron-strawberry",
+      "macaron-mint",
+      "macaron-blueberry"
+    ],
+    "nordic": [
+      "nordic-fjord-blue",
+      "nordic-pine-green",
+      "nordic-cloud-grey"
+    ],
+    "vintage": [
+      "vintage-amber",
+      "vintage-burgundy",
+      "vintage-forest"
+    ],
+    "mint": [
+      "mint-matcha",
+      "mint-spearmint",
+      "mint-seafoam"
+    ]
+  },
+  "mermaid_presets": [
+    "light",
+    "dark",
+    "elegant"
   ],
   "tags": [
     "colamd",
     "theme",
     "css",
     "markdown",
+    "html",
+    "pdf",
     "wcag",
     "typography",
     "mermaid"

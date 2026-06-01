@@ -272,7 +272,7 @@
 | accentLight | `#dff4f4` |
 | accentDark | `#558a8a` |
 | surface | `#f8fcfc` |
-| panel | #`eef6f6` |
+| panel | `eef6f6` |
 | panelAlt | `#e2eeee` |
 | ink | `#283838` |
 | inkMuted | `#7a8e8e` |
@@ -287,13 +287,13 @@
 通过 `-c, --color-system` 参数指定：
 
 ```bash
-node dist/cli.ts from-url "https://example.com" --name "my-theme" -c morandi-pink
-node dist/cli.ts extract source.docx --name "theme" -c macaron-mint --auto-match
+colamd-themes from-url "https://example.com" --name "my-theme" -c morandi-pink
+colamd-themes extract source.docx --name "theme" -c macaron-mint --auto-match
 ```
 
 查看所有可用色彩系统：
 
 ```bash
-node dist/cli.ts color-systems
-node dist/cli.ts color-systems -j   # JSON 格式
+colamd-themes color-systems
+colamd-themes color-systems -j   # JSON 格式
 ```

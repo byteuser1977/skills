@@ -1,37 +1,27 @@
 #!/bin/bash
 #
 # ColaMD Themes Wrapper Script
-# 自动切换到 ColaMD-themes 项目根目录并执行 CLI 命令
+# 通过 npx 或全局安装的 colamd-themes 命令执行 CLI 操作
+#
+# 使用前请赋予执行权限:
+#   chmod +x scripts/colamd-themes-wrapper.sh
 #
 # 使用方法：
-#   ./colamd-themes-wrapper.sh from-url "https://example.com" -n "theme"
-#   ./colamd-themes-wrapper.sh extract source.docx -A
+#   ./scripts/colamd-themes-wrapper.sh from-url "https://example.com" -n "theme"
+#   ./scripts/colamd-themes-wrapper.sh extract source.docx -A
+#
+# 优先级：全局安装 > npx
 
 set -e
 
-# ColaMD-themes 项目根目录
-PROJECT_ROOT="/Volumes/DATA/data/develop/git/ColaMD-themes"
-
-if [ ! -d "$PROJECT_ROOT" ]; then
-    echo "错误: ColaMD-themes 项目目录不存在: $PROJECT_ROOT" >&2
-    exit 1
-fi
-
-cd "$PROJECT_ROOT"
-
-if [ ! -f "dist/cli.js" ] && [ ! -f "src/cli.ts" ]; then
-    echo "错误: 未找到 ColaMD-themes CLI 入口文件" >&2
-    exit 1
-fi
-
-if [ ! -d "node_modules" ]; then
-    echo "警告: node_modules 不存在，请先运行 npm install" >&2
-fi
-
-if [ -f "dist/cli.js" ]; then
-    CMD="node dist/cli.js"
+# 检查 colamd-themes 是否已全局安装
+if command -v colamd-themes &> /dev/null; then
+    CMD="colamd-themes"
+elif command -v cthemes &> /dev/null; then
+    CMD="cthemes"
 else
-    CMD="npx tsx src/cli.ts"
+    # 使用 npx 运行
+    CMD="npx @bytechain.cn/colamd-themes"
 fi
 
 $CMD "$@"

@@ -1,76 +1,106 @@
 # ColaMD Themes 技能
 
-本技能提供了完整的 ColaMD 主题生成、验证和管理工作流。
+基于 `@bytechain.cn/colamd-themes` npm 包的 AI Agent 技能，提供完整的主题生成、验证、导出和管理工作流。
 
 ## 快速开始
 
-### 1. 安装依赖
-
-确保已在 ColaMD-themes 项目目录中安装依赖：
+### 方式1：全局安装（推荐）
 
 ```bash
-cd /mnt/d/workspace/git/ColaMD-themes
-npm install
-npm run build
+npm install -g @bytechain.cn/colamd-themes
+
+# 验证安装
+colamd-themes --version
 ```
 
-### 2. 基本使用
-
-使用 wrapper 脚本运行命令：
+### 方式2：npx 按需运行（无需安装）
 
 ```bash
-# 从文件自动提取并生成主题
-cd /mnt/d/workspace/git/skills/colamd-themes
-./scripts/colamd-themes-wrapper.sh extract /path/to/source.docx -n "my-theme" -A
-
-# 验证生成的 CSS
-./scripts/colamd-themes-wrapper.sh validate themes/my-theme.css
-
-# 列出现有主题
-./scripts/colamd-themes-wrapper.sh list
-
-# 查看可用的颜色系统
-./scripts/colamd-themes-wrapper.sh color-systems
+npx @bytechain.cn/colamd-themes <command>
 ```
 
-或者直接进入 ColaMD-themes 项目使用 npx：
+### 基本使用示例
 
 ```bash
-cd /mnt/d/workspace/git/ColaMD-themes
-npx tsx src/cli.ts extract source.pdf -n "theme" --auto-match
+# 从 Word 文档提取并生成主题
+colamd-themes extract ./report.docx -n "my-theme" -A
+
+# 从网页提取主题
+colamd-themes from-url "https://example.com" -n "web-theme"
+
+# 导出 Markdown 为 HTML/PDF
+colamd-themes export-html doc.md -t elegant -o output.html
+colamd-themes export-pdf doc.md -t dark -o output.pdf
+
+# 验证生成的 CSS 主题
+colamd-themes validate themes/my-theme.css
+
+# 查看可用的色彩系统（15套）
+colamd-themes color-systems
 ```
 
-详细命令参考，请查看 [SKILL.md](./SKILL.md)。
+详细命令参考请查看 [SKILL.md](./SKILL.md)。
 
 ## 支持的源格式
 
-- **URL**：网页链接（自动解析 CSS 规则）
-- **DOCX**：Word 文档（.docx）
-- **PDF**：带文本层的 PDF
+| 格式 | 说明 | 命令 |
+|------|------|------|
+| **URL** | 网页链接，自动解析 CSS 规则 | `from-url` |
+| **DOCX** | Word 文档 (.docx) | `from-docx` |
+| **PDF** | 带文本层的 PDF | `from-pdf` |
 
-## 输出的主题结构
+## 输出格式
 
-生成的主题 CSS 文件包含 6 个 SECTION：
+| 格式 | 命令 |
+|------|------|
+| **CSS** | 主题文件 (v3.0 范式) | `extract` / `from-*` |
+| **HTML** | 独立 HTML 文档 | `export-html` |
+| **PDF** | PDF 文档 | `export-pdf` |
 
-1. **Design Tokens**：种子颜色和字体（用户可编辑）
-2. **Semantic Mapping**：语义变量映射
-3. **Mermaid Variables**：图表配色（20 个变量）
-4. **Fine Tuning**：微调
-5. **Selector Adjustments**：选择器级调整
-6. **Print Styles**：打印样式
+## 生成的主题结构
 
-## 依赖的项目
+CSS 主题文件包含 6 个 SECTION：
 
-本技能依赖于外部的 [ColaMD-themes](https://github.com/byteuser1977/ColaMD-themes) 项目。请确保：
+1. **Design Tokens** — 种子颜色和字体（用户可编辑）
+2. **Semantic Mapping** — 语义变量映射
+3. **Mermaid Variables** — 图表配色（20 个变量）
+4. **Fine Tuning** — 微调
+5. **Selector Adjustments** — 选择器级调整
+6. **Print Styles** — 打印样式
+
+## 内置资源
+
+- **4 个内置主题**: `light`, `dark`, `elegant`, `newsprint`
+- **15 套色彩系统**: 莫兰迪、马卡龙、北欧、复古、薄荷绿
+- **3 套 Mermaid 预设**: `light`, `dark`, `elegant`
+
+详见 [references/color-systems.md](references/color-systems.md)
+
+## 依赖要求
 
 - Node.js ≥ 18
-- ColaMD-themes 项目已克隆到 `/mnt/d/workspace/git/ColaMD-themes`
-- 已运行 `npm install` 和 `npm run build`
+- npm 包: `@bytechain.cn/colamd-themes`
 
 ## 故障排除
 
-- **命令找不到**：确认已在 ColaMD-themes 项目根目录运行过 `npm install`
-- **编译错误**：运行 `npm run build` 重新编译
-- **提取失败**：检查源文件路径是否正确，PDF 需要文本层而非扫描图像
+| 问题 | 解决方案 |
+|------|----------|
+| `command not found: colamd-themes` | 运行 `npm install -g @bytechain.cn/colamd-themes` 或使用 `npx @bytechain.cn/colamd-themes` |
+| npx 首次运行慢 | 正常现象，首次需要下载包；后续运行会使用缓存 |
+| PDF 导出失败 | Puppeteer 需要 Chromium，确保网络可访问或配置镜像 |
+| 提取失败 (PDF) | 确认 PDF 有文本层而非扫描图像 |
+| 主题验证失败 | 检查 [references/validation-rules.md](references/validation-rules.md) 中的 v3.0 范式约束 |
 
-详细故障排除请参考主技能文档 [SKILL.md](./SKILL.md)。
+## 技能文件结构
+
+```
+colamd-themes/
+├── SKILL.md                      # 主技能文档（核心指令）
+├── manifest.json                 # 元数据与命令定义
+├── README.md                     # 本文件
+├── scripts/
+│   └── colamd-themes-wrapper.sh  # CLI 包装脚本
+└── references/
+    ├── color-systems.md          # 15 套色彩系统参考
+    └── validation-rules.md       # v3.0 范式验证规则
+```

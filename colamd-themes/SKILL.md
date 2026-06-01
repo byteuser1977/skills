@@ -21,9 +21,25 @@ ColaMD v3.0 范式 CSS 主题的生成、验证、导出与管理工具。
 ## 前置条件
 
 - Node.js ≥ 18
-- 项目路径：`/Volumes/DATA/data/develop/git/ColaMD-themes`
-- 首次使用前执行：`cd /Volumes/DATA/data/develop/git/ColaMD-themes && npm install && npm run build`
-- CLI命令：`node /Volumes/DATA/data/develop/git/ColaMD-themes/dist/cli.js <command>` 或 `npx tsx /Volumes/DATA/data/develop/git/ColaMD-themes/src/cli.ts <command>`
+- npm 包：`@bytechain.cn/colamd-themes`
+
+### 安装方式（二选一）
+
+**方式1：全局安装（推荐频繁使用）**
+```bash
+npm install -g @bytechain.cn/colamd-themes
+```
+安装后直接使用：`colamd-themes <command>` 或 `cthemes <command>`
+
+**方式2：npx 按需运行（无需安装）**
+```bash
+npx @bytechain.cn/colamd-themes <command>
+```
+
+### 首次使用验证
+```bash
+colamd-themes --version   # 或 npx @bytechain.cn/colamd-themes --version
+```
 
 ## 核心工作流
 
@@ -31,16 +47,16 @@ ColaMD v3.0 范式 CSS 主题的生成、验证、导出与管理工具。
 
 ```bash
 # 从网页URL提取
-node dist/cli.ts from-url "https://example.com" --name "my-theme"
+colamd-themes from-url "https://example.com" --name "my-theme"
 
 # 从Word文档提取
-node dist/cli.ts from-docx report.docx --name "corporate-theme"
+colamd-themes from-docx report.docx --name "corporate-theme"
 
 # 从PDF提取
-node dist/cli.ts from-pdf paper.pdf --name "academic-theme"
+colamd-themes from-pdf paper.pdf --name "academic-theme"
 
 # 自动检测来源类型
-node dist/cli.ts extract <source> --name "auto-theme" --auto-match
+colamd-themes extract <source> --name "auto-theme" --auto-match
 ```
 
 **提取选项：**
@@ -58,14 +74,14 @@ node dist/cli.ts extract <source> --name "auto-theme" --auto-match
 
 ```bash
 # 单文件导出为HTML
-node dist/cli.ts export-html doc.md -t elegant -o output.html
+colamd-themes export-html doc.md -t elegant -o output.html
 
 # 单文件导出为PDF
-node dist/cli.ts export-pdf doc.md -t dark -o output.pdf
+colamd-themes export-pdf doc.md -t dark -o output.pdf
 
 # 批量导出
-node dist/cli.ts export docs/*.md --format html -t light -d output/
-node dist/cli.ts export docs/ --format pdf -t elegant -d output/
+colamd-themes export docs/*.md --format html -t light -d output/
+colamd-themes export docs/ --format pdf -t elegant -d output/
 ```
 
 **导出选项：**
@@ -81,35 +97,35 @@ node dist/cli.ts export docs/ --format pdf -t elegant -d output/
 
 ```bash
 # 设置默认主题
-node dist/cli.ts set-theme elegant --default
+colamd-themes set-theme elegant --default
 
 # 注册自定义主题
-node dist/cli.ts set-theme my-brand --css themes/swiss-design.css
+colamd-themes set-theme my-brand --css themes/swiss-design.css
 
 # 注册并设为默认
-node dist/cli.ts set-theme my-brand --css themes/custom.css --default
+colamd-themes set-theme my-brand --css themes/custom.css --default
 
 # 注销自定义主题
-node dist/cli.ts set-theme my-brand --remove
+colamd-themes set-theme my-brand --remove
 
 # 列出所有主题
-node dist/cli.ts list -d themes/
+colamd-themes list -d themes/
 
 # 验证主题
-node dist/cli.ts validate themes/my-theme.css
+colamd-themes validate themes/my-theme.css
 ```
 
 ### 工作流4：查询参考信息
 
 ```bash
 # 列出所有15种色彩系统
-node dist/cli.ts color-systems
+colamd-themes color-systems
 
 # JSON格式输出
-node dist/cli.ts color-systems -j
+colamd-themes color-systems -j
 
 # 列出Mermaid预设
-node dist/cli.ts mermaid-presets
+colamd-themes mermaid-presets
 ```
 
 ## 主题解析规则
@@ -199,23 +215,35 @@ interface SeedPalette {
 
 ```bash
 # 1. 从企业网站提取基础样式
-node dist/cli.ts from-url "https://company.com" --name "brand-theme" --auto-match -o themes/
+colamd-themes from-url "https://company.com" --name "brand-theme" --auto-match -o themes/
 
 # 2. 验证生成的主题
-node dist/cli.ts validate themes/brand-theme.css
+colamd-themes validate themes/brand-theme.css
 
 # 3. 注册为主题
-node dist/cli.ts set-theme brand-theme --css themes/brand-theme.css --default
+colamd-themes set-theme brand-theme --css themes/brand-theme.css --default
 
 # 4. 导出文档
-node dist/cli.ts export-html report.md -t brand-theme -o output/report.html
-node dist/cli.ts export-pdf report.md -t brand-theme -o output/report.pdf
+colamd-themes export-html report.md -t brand-theme -o output/report.html
+colamd-themes export-pdf report.md -t brand-theme -o output/report.pdf
 ```
 
 ### 批量生成多格式输出
 
 ```bash
 # 所有 markdown 文件同时导出为 HTML 和 PDF
-node dist/cli.ts export docs/*.md --format html -t elegant -d output/html/
-node dist/cli.ts export docs/*.md --format pdf -t dark -d output/pdf/
+colamd-themes export docs/*.md --format html -t elegant -d output/html/
+colamd-themes export docs/*.md --format pdf -t dark -d output/pdf/
 ```
+
+## 故障排除
+
+| 问题 | 原因 | 解决方案 |
+|------|------|----------|
+| `command not found: colamd-themes` | 未全局安装 | 运行 `npm install -g @bytechain.cn/colamd-themes` 或使用 `npx @bytechain.cn/colamd-themes` |
+| npx 首次运行非常慢 | 需要下载 npm 包和依赖 | 正常现象，后续运行会使用缓存；频繁使用建议全局安装 |
+| PDF 导出失败 / Chromium 错误 | Puppeteer 需要 Chromium | 确保网络可访问，或配置 `PUPPETEER_CHROMIUM_REVISION` 镜像 |
+| PDF 提取返回空结果 | PDF 是扫描图像无文本层 | 需要使用有文本层的 PDF（非扫描件） |
+| URL 提取失败 | 目标网站反爬或无法访问 | 检查 URL 可访问性，某些 SPA 可能需要额外处理 |
+| 主题验证显示 MUST 级别错误 | 违反 v3.0 范式约束 | 查看 [references/validation-rules.md](references/validation-rules.md) 对应规则并修复 |
+| `set-theme` 配置不生效 | 配置文件路径错误 | 默认配置位于 `~/.colamd-themes/config.json` |
