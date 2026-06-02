@@ -1,8 +1,8 @@
 # ColaMD Themes 技能
 
-基于 `@bytechain.cn/colamd-themes` npm 包的 AI Agent 技能（v1.3.0），提供完整的主题生成、验证、导出和管理工作流。
+基于 `@bytechain.cn/colamd-themes` npm 包的 AI Agent 技能（v2.0.0），提供完整的主题生成、验证、导出和管理工作流。
 
-**当前支持 colamd-thems v0.3.2** — 包含安全防护、性能优化、多 Agent 技能支持和**增强审计功能**。
+**当前支持 colamd-thems v0.3.2** — 包含安全防护、性能优化、多 Agent 技能支持和**设计约束规范(DC)**。
 
 ## 🆕 v0.3.2 新特性
 
@@ -130,19 +130,21 @@ CSS 主题文件包含 6 个 SECTION：
 ```
 colamd-themes/
 ├── SKILL.md                      # 主技能文档（核心指令）
-├── manifest.json                 # 元数据与命令定义 (v1.3.0)
+├── manifest.json                 # 元数据与命令定义 (v2.0.0)
 ├── README.md                     # 本文件
 ├── scripts/
 │   └── colamd-themes-wrapper.sh  # CLI 包装脚本
 └── references/
+    ├── design-constraints.md     # ⭐ 设计约束规范 (DC) v2.0
     ├── color-systems.md          # 15 套色彩系统参考
-    └── validation-rules.md       # v3.0 范式验证规则
+    └── validation-rules.md       # v3.0 范式验证规则（含DC）
 ```
 
 ## 版本历史
 
 | 技能版本 | 对应 CLI 版本 | 主要变更 |
 |----------|---------------|----------|
-| **1.3.0** | **0.3.2** | **增强审计功能**：字体提取验证(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT) |
+| **2.0.0** | **0.3.2** | **设计约束规范(DC)**：5大核心约束(字体/字号/配色/扩展背景/打印同步) |
+| 1.3.0 | 0.3.2 | 增强审计功能：字体提取验证(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT) |
 | 1.2.0 | 0.3.2 | 添加 SSRF 防护、输入验证、异步 I/O、模板缓存、多 Agent 支持特性说明 |
 | 1.1.0 | 0.3.x | 初始版本，基于 npm 包重构 |

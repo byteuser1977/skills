@@ -1,6 +1,6 @@
 ---
 name: colamd-themes
-version: 1.3.0
+version: 2.0.0
 description: |
   ColaMD 主题开发与导出工具 (v0.3.2)。用于从网页、Word文档(DOCX)、PDF提取视觉格式并生成v3.0范式CSS主题，
   将Markdown导出为带主题样式的独立HTML或PDF文件，管理内置/自定义主题，验证主题合规性。
@@ -305,6 +305,53 @@ colamd-themes validate theme.html --visual-report
 
 完整验证规则见 [references/validation-rules.md](references/validation-rules.md)
 
+## 设计约束规范 (DC) ⭐ v2.0
+
+ColaMD 主题生成的**核心设计约束**，确保符合现代中文文档站点标准。
+
+**完整规范**: [references/design-constraints.md](references/design-constraints.md)
+
+### 5 大核心约束速查
+
+| 编号 | 约束域 | 核心规则 |
+|------|--------|----------|
+| **DC-1** | 字体 | 中文无衬线为主，禁西文主字体；代码等宽+CJK回退 |
+| **DC-2** | 字号 | H1→H6: `2/1.5/1.25/1.125/1/0.95` 严格降序（16px基准）|
+| **DC-3** | 配色 | 浅色方向；同色相轴明度梯度；禁深底深字/浅底浅字 |
+| **DC-4** | 扩展背景 | 与正文同系（浅-浅/深-深），差异≤15% |
+| **DC-5** | 打印 | @media print 变量与屏幕版完全一致 |
+
+### 关键代码规范
+
+```css
+/* DC-1: 字体 */
+--font-body: -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", sans-serif;
+--font-code: "SF Mono", "Menlo", "Consolas", "PingFang SC", monospace;
+
+/* DC-3: 配色 - 同色相轴（灰轴）*/
+--seed-surface: hsl(0, 0%, 99%);
+--seed-panel:   hsl(0, 0%, 96%);
+--seed-panelAlt:hsl(0, 0%, 93%);
+--seed-border:  hsl(0, 0%, 88%);
+
+/* DC-4: 扩展元素背景 */
+.md-code-block { background: #F8F8F8; } /* 比surface暗2-4% */
+blockquote       { background: #FAFAFA; } /* 比surface暗1-2% */
+
+/* DC-5: 打印同步 */
+@media print {
+  :root { --seed-surface: var(--seed-surface); /* 保持原值 */ }
+}
+```
+
+### 验证命令
+
+```bash
+colamd-themes validate theme.css --check design-constraints
+colamd-themes validate theme.css --full-audit
+```
+
 ## 渲染管线架构
 
 导出功能使用 Puppeteer (headless Chromium) + `@bytechain.cn/colamd/renderer`：
@@ -426,6 +473,7 @@ colamd-themes export docs/*.md --format pdf -t dark -d output/pdf/
 
 | 技能版本 | 对应包版本 | 主要变更 |
 |----------|------------|----------|
-| **1.3.0** | **0.3.2** | 增强审计工作流：字体提取验证(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT) |
+| **2.0.0** | **0.3.2** | **设计约束规范(DC)**：5大核心约束(字体/字号/配色/扩展背景/打印同步) |
+| 1.3.0 | 0.3.2 | 增强审计工作流：字体提取验证(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT) |
 | 1.2.0 | 0.3.2 | 新增安全/性能特性、多Agent支持、SSRF防护 |
 | 1.1.0 | 0.3.0 | 初始版本，基于 npm 包重构 |
