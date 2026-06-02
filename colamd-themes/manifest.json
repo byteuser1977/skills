@@ -1,12 +1,33 @@
 {
   "name": "colamd-themes",
-  "version": "1.1.0",
-  "description": "ColaMD 主题生成与管理技能，基于 @bytechain.cn/colamd-themes npm 包。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件，以及将 Markdown 导出为 HTML/PDF。",
+  "version": "1.2.0",
+  "description": "ColaMD 主题生成与管理技能 (v0.3.2)，基于 @bytechain.cn/colamd-themes npm 包。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件，以及将 Markdown 导出为 HTML/PDF。v0.3.2 新增：SSRF防护、输入验证、异步I/O、模板缓存、多Agent技能支持。",
   "author": "ColaMD Community",
   "license": "MIT",
   "npm_package": "@bytechain.cn/colamd-themes",
   "dependencies": {
     "node": ">=18"
+  },
+  "features": {
+    "v0_3_2": {
+      "security": {
+        "ssrf_protection": "URL提取器验证协议白名单，阻止私有网络访问",
+        "input_validation": "CSS文件验证扩展名、大小限制（最大1MB）、内容有效性",
+        "error_handling": "结构化错误代码(CLIError + ErrorCode)，便于调试"
+      },
+      "performance": {
+        "async_io": "非阻塞文件操作，提升批量导出响应性",
+        "template_cache": "LRU缓存策略（最多10个模板）、TTL过期（30分钟）、基于mtime的自动失效",
+        "resource_cleanup": "显式Puppeteer页面清理，防止僵尸进程和内存泄漏"
+      },
+      "multi_agent_support": [
+        "Claude Code",
+        "OpenCode",
+        "OpenClaw",
+        "Hermes",
+        "Trae"
+      ]
+    }
   },
   "install": {
     "global": "npm install -g @bytechain.cn/colamd-themes",
@@ -19,7 +40,7 @@
   },
   "commands": {
     "from-url": {
-      "description": "从 URL 提取主题",
+      "description": "从 URL 提取主题（含 SSRF 防护）",
       "usage": "colamd-themes from-url <URL> [options]",
       "options": {
         "-n, --name": "主题名称",
@@ -43,7 +64,7 @@
       "usage": "colamd-themes extract <source> [options]"
     },
     "export-html": {
-      "description": "导出 Markdown 为 HTML",
+      "description": "导出 Markdown 为 HTML（支持异步 I/O）",
       "usage": "colamd-themes export-html <input.md> -t <theme> -o <output.html>",
       "options": {
         "-t, --theme": "主题名称或 CSS 文件路径",
@@ -51,7 +72,7 @@
       }
     },
     "export-pdf": {
-      "description": "导出 Markdown 为 PDF",
+      "description": "导出 Markdown 为 PDF（含资源清理优化）",
       "usage": "colamd-themes export-pdf <input.md> -t <theme> -o <output.pdf>",
       "options": {
         "-t, --theme": "主题名称或 CSS 文件路径",
@@ -60,7 +81,7 @@
       }
     },
     "export": {
-      "description": "批量导出多个文件",
+      "description": "批量导出多个文件（支持异步 I/O + 模板缓存）",
       "usage": "colamd-themes export <inputs...> --format html|pdf -t <theme> -d <dir>"
     },
     "set-theme": {
@@ -80,8 +101,15 @@
       "usage": "colamd-themes mermaid-presets [-j]"
     },
     "validate": {
-      "description": "验证主题是否符合 v3.0 范式",
+      "description": "验证主题是否符合 v3.0 范式（含输入验证）",
       "usage": "colamd-themes validate <theme.css>"
+    },
+    "convert-skill": {
+      "description": "转换为其他 AI Agent 技能格式",
+      "usage": "colamd-themes convert-skill [--agent claude-code|opencode|openclaw|hermes|trae]",
+      "options": {
+        "--agent": "目标 Agent 类型"
+      }
     }
   },
   "examples": [
@@ -98,19 +126,19 @@
       "command": "colamd-themes extract ./report.docx -n \"corporate\" -A"
     },
     {
-      "description": "从网页提取并指定 Morandi 配色",
+      "description": "从网页提取并指定 Morandi 配色（含 SSRF 防护）",
       "command": "colamd-themes from-url https://example.com -n \"web-theme\" -c sage-green"
     },
     {
-      "description": "导出为 HTML",
+      "description": "导出为 HTML（异步 I/O 优化）",
       "command": "colamd-themes export-html doc.md -t elegant -o output.html"
     },
     {
-      "description": "导出为 PDF",
+      "description": "导出为 PDF（含 Puppeteer 资源清理）",
       "command": "colamd-themes export-pdf doc.md -t dark -o output.pdf"
     },
     {
-      "description": "批量导出目录下所有 Markdown",
+      "description": "批量导出目录下所有 Markdown（模板缓存加速）",
       "command": "colamd-themes export docs/ --format pdf -t elegant -d output/"
     },
     {
@@ -118,8 +146,12 @@
       "command": "colamd-themes set-theme my-brand --css themes/custom.css --default"
     },
     {
-      "description": "验证主题合规性",
+      "description": "验证主题合规性（含 CSS 大小验证 ≤1MB）",
       "command": "colamd-themes validate themes/my-theme.css"
+    },
+    {
+      "description": "转换为 Claude Code 技能格式",
+      "command": "colamd-themes convert-skill --agent claude-code"
     }
   ],
   "scripts": {
@@ -182,6 +214,9 @@
     "pdf",
     "wcag",
     "typography",
-    "mermaid"
+    "mermaid",
+    "security",
+    "performance",
+    "multi-agent"
   ]
 }

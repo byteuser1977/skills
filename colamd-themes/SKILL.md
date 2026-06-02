@@ -1,8 +1,15 @@
 ---
 name: colamd-themes
+version: 1.2.0
 description: |
-  ColaMD 主题开发与导出工具。用于从网页、Word文档(DOCX)、PDF提取视觉格式并生成v3.0范式CSS主题，
+  ColaMD 主题开发与导出工具 (v0.3.2)。用于从网页、Word文档(DOCX)、PDF提取视觉格式并生成v3.0范式CSS主题，
   将Markdown导出为带主题样式的独立HTML或PDF文件，管理内置/自定义主题，验证主题合规性。
+  
+  v0.3.2 新增特性：
+  - 🔒 SSRF防护 + 输入验证（CSS≤1MB）+ 统一错误处理
+  - ⚡ 异步I/O + 模板缓存（LRU, 10个模板, TTL=30min）
+  - 🤖 多Agent技能支持（Claude Code/OpenCode/OpenClaw/Hermes/Trae）
+  - 🧹 Puppeteer显式资源清理，防止僵尸进程
   
   适用场景：
   - 从URL/DOCX/PDF源提取样式生成CSS主题（from-url, from-docx, from-pdf, extract）
@@ -17,6 +24,8 @@ description: |
 # ColaMD Themes Skill
 
 ColaMD v3.0 范式 CSS 主题的生成、验证、导出与管理工具。
+
+**当前支持版本**: @bytechain.cn/colamd-themes **0.3.2**
 
 ## 前置条件
 
@@ -39,6 +48,7 @@ npx @bytechain.cn/colamd-themes <command>
 ### 首次使用验证
 ```bash
 colamd-themes --version   # 或 npx @bytechain.cn/colamd-themes --version
+# 应输出: 0.3.2
 ```
 
 ## 核心工作流
@@ -187,7 +197,25 @@ Source Markdown → Local HTTP Server → Puppeteer → ColaMDEditor → applyTh
 5. `setMarkdown(content)` 加载文档内容
 6. `ensureAllPluginsRendered()` 等待 Mermaid/KaTeX 渲染完成
 7. `buildExportHTML()` → 生成内嵌 CSS 的独立 HTML
-8. PDF 导出：`emulateMediaType('screen')` + `page.pdf()`
+8. PDF 导出：使用 `@media print` 规则（非 emulateMediaType），确保 print-color-adjust: exact
+
+## 安全与性能特性 (v0.3.2+)
+
+### 🔒 安全防护
+
+| 特性 | 说明 |
+|------|------|
+| **SSRF 防护** | URL 提取器验证协议白名单，阻止私有网络访问（防止 Server-Side Request Forgery） |
+| **输入验证** | CSS 文件验证扩展名、大小限制（**最大 1MB**）、内容有效性（防止 OOM 攻击） |
+| **统一错误处理** | 结构化错误代码 (`CLIError` + `ErrorCode`)，便于调试 |
+
+### ⚡ 性能优化
+
+| 特性 | 说明 |
+|------|------|
+| **异步 I/O** | 非阻塞文件操作，提升批量导出响应性 |
+| **模板缓存** | LRU 缓存策略（最多 10 个模板）、TTL 过期（30 分钟）、基于 mtime 的自动失效 |
+| **资源清理** | 显式 Puppeteer 页面清理，防止僵尸进程和内存泄漏 |
 
 ## 种子色板模型 (SeedPalette)
 
@@ -207,6 +235,25 @@ interface SeedPalette {
   border: string;        // 边框颜色
   borderStrong: string;  // 强调边框
 }
+```
+
+## 多 Agent 技能支持
+
+本技能可自动转换为以下 AI 编码代理的格式：
+
+| Agent | 技能路径 | 前置元数据 |
+|-------|----------|------------|
+| **Claude Code** | `.claude/skills/colamd-themes.skill.md` | `name`, `description` |
+| **OpenCode** | `.opencode/skills/colamd-themes/SKILL.md` | `name`, `version`, `user-invocable`, `allowed-tools`, `hooks` |
+| **OpenClaw** | `.openclaw/skills/colamd-themes/SKILL.md` | `id`, `name`, `version`, `icon`, `author`, `homepage` |
+| **Hermes** | `.hermes/skills/tools/colamd-themes/SKILL.md` | `name`, `version`, `author`, `license`, `tags`, `prerequisites` |
+| **Trae** | `.trae/rules/colamd-themes.md` | 纯 Markdown（无前置元数据） |
+
+**构建脚本**:
+```bash
+npm run build:skills              # 生成所有代理技能
+bash skills/build-skills.sh       # 同上
+bash skills/build-skills.sh claude # 仅生成 Claude Code
 ```
 
 ## 常见任务模式
@@ -245,5 +292,15 @@ colamd-themes export docs/*.md --format pdf -t dark -d output/pdf/
 | PDF 导出失败 / Chromium 错误 | Puppeteer 需要 Chromium | 确保网络可访问，或配置 `PUPPETEER_CHROMIUM_REVISION` 镜像 |
 | PDF 提取返回空结果 | PDF 是扫描图像无文本层 | 需要使用有文本层的 PDF（非扫描件） |
 | URL 提取失败 | 目标网站反爬或无法访问 | 检查 URL 可访问性，某些 SPA 可能需要额外处理 |
+| SSRF 错误 | URL 包含私有网络地址 | 仅允许公网 URL，不支持 localhost/内网地址 |
+| CSS 文件过大错误 | 自定义主题超过 1MB 限制 | 压缩或精简 CSS 文件至 1MB 以内 |
 | 主题验证显示 MUST 级别错误 | 违反 v3.0 范式约束 | 查看 [references/validation-rules.md](references/validation-rules.md) 对应规则并修复 |
 | `set-theme` 配置不生效 | 配置文件路径错误 | 默认配置位于 `~/.colamd-themes/config.json` |
+| 内存占用过高 | 批量导出时未释放资源 | v0.3.2+ 已优化，如仍有问题请减少并发数 |
+
+## 版本历史
+
+| 技能版本 | 对应包版本 | 主要变更 |
+|----------|------------|----------|
+| **1.2.0** | **0.3.2** | 新增安全/性能特性、多Agent支持、SSRF防护 |
+| 1.1.0 | 0.3.0 | 初始版本，基于 npm 包重构 |
