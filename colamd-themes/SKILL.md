@@ -1,6 +1,6 @@
 ---
 name: colamd-themes
-version: 1.2.0
+version: 1.3.0
 description: |
   ColaMD 主题开发与导出工具 (v0.3.2)。用于从网页、Word文档(DOCX)、PDF提取视觉格式并生成v3.0范式CSS主题，
   将Markdown导出为带主题样式的独立HTML或PDF文件，管理内置/自定义主题，验证主题合规性。
@@ -136,6 +136,130 @@ colamd-themes color-systems -j
 
 # 列出Mermaid预设
 colamd-themes mermaid-presets
+```
+
+### 工作流5：主题审计与范式验证（增强版）
+
+提取主题后必须进行完整审计，确保字体正确提取、配色合理、背景前景可识别。
+
+#### 5.1 完整审计流程
+
+```bash
+# 步骤1：提取主题（启用详细日志记录字体来源）
+colamd-themes extract <source> --name "audit-theme" --verbose -o themes/
+
+# 步骤2：基础范式验证
+colamd-themes validate themes/audit-theme.css
+
+# 步骤3：全面审计（字体+配色+对比度+图案）
+colamd-themes validate themes/audit-theme.css --full-audit
+
+# 步骤4：生成结构化审计报告
+colamd-themes validate themes/audit-theme.css --report audit-report.json
+```
+
+#### 5.2 字体提取专项审计
+
+**目标**: 验证字体是否从源文件/URL 正确提取并保持一致。
+
+```bash
+# 查看字体详细信息
+colamd-themes validate theme.css --detail fonts
+
+# 检查各选择器字体一致性
+colamd-themes validate theme.css --check font-consistency
+
+# 验证 Web 字体可用性
+colamd-themes validate theme.css --check web-fonts
+```
+
+**审计要点 (FA 规则)**:
+
+| 规则 | 级别 | 检查内容 |
+|------|------|----------|
+| FA-01 | MUST | 字体来源可追溯（URL/DOCX/PDF 对应） |
+| FA-02 | SHOULD | Web 字体 (@font-face) 加载有效 |
+| FA-03 | MUST | 字体回退链完整（≥4级） |
+| FA-04 | MUST | **所有选择器字体栈统一**（重点！） |
+| FA-05 | SHOULD | 字体文件可用且格式兼容 |
+
+**常见问题**:
+- Mermaid 图表 `.node .label` 使用不完整的字体栈
+- 代码块缺少等宽字体声明
+- 引用块使用不同的字体族
+
+#### 5.3 配色合理性审计
+
+**目标**: 验证配色组合是否合理，特别是背景色与前景元素的识别度。
+
+```bash
+# 检查所有背景-前景配对对比度
+colamd-themes validate theme.css --check contrast-matrix
+
+# 仅检查代码块可读性
+colamd-themes validate theme.css --check code-readability
+
+# 检查 Mermaid 图表配色
+colamd-themes validate theme.css --check mermaid-colors
+```
+
+**核心审计: 背景前景配对矩阵 (BF-03)**
+
+```
+┌─────────────┬───────────┬──────────┬──────────┬──────────┐
+│   背景      │  正文文字 │ 次要文字 │ 辅助文字 │  强调色   │
+├─────────────┼───────────┼──────────┼──────────┼──────────┤
+│ surface     │ ≥7:1 ✅   │ ≥4.5:1✅ │ ≥3:1 ⚠️  │ ≥4.5:1✅ │
+│ panel       │ ≥7:1 ✅   │ ≥4.5:1✅ │ ≥3:1 ⚠️  │ ≥4.5:1✅ │
+│ panelAlt    │ ≥7:1 ✅   │ ≥4.5:1✅ │ ≥3:1 ⚠️  │ ≥4.5:1✅ │
+│ code-bg     │ ≥7:1 ✅   │ N/A      │ N/A      │ N/A      │
+│ quote-bg    │ ≥7:1 ✅   │ ≥4.5:1✅ │ N/A      │ N/A      │
+└─────────────┴───────────┴──────────┴──────────┴──────────┘
+```
+
+**背景类型清单**:
+- `--seed-surface`: 页面主背景
+- `--seed-panel`: 卡片/面板背景
+- `--seed-panelAlt`: 交替行背景
+- 代码块背景 (自定义)
+- 引用块背景 (自定义)
+
+**前景元素清单**:
+- `--seed-ink`: 正文文字
+- `--seed-inkMuted`: 次要文字
+- `--seed-inkDim`: 辅助文字
+- 链接颜色、边框、分割线等
+
+#### 5.4 图案/装饰检测
+
+```bash
+# 检测渐变、阴影、背景图等装饰元素
+colamd-themes validate theme.css --check patterns
+
+# 检测可能影响阅读的视觉效果
+colamd-themes validate theme.css --check visual-interference
+```
+
+**检测项 (PT 规则)**:
+- PT-01: 渐变背景是否干扰阅读
+- PT-02: 背景图片/纹理是否有纯色 fallback
+- PT-03: 阴影效果是否过重
+- PT-04: 边框装饰是否遮挡内容
+
+#### 5.5 快速诊断命令
+
+```bash
+# 仅检查字体问题
+colamd-themes validate theme.css --check fonts
+
+# 仅检查对比度
+colamd-themes validate theme.css --check contrast
+
+# 检查特定选择器（如 Mermaid 图表）
+colamd-themes validate theme.css --selector ".md-diagram-panel"
+
+# 导出可视化 HTML 报告
+colamd-themes validate theme.html --visual-report
 ```
 
 ## 主题解析规则
@@ -302,5 +426,6 @@ colamd-themes export docs/*.md --format pdf -t dark -d output/pdf/
 
 | 技能版本 | 对应包版本 | 主要变更 |
 |----------|------------|----------|
-| **1.2.0** | **0.3.2** | 新增安全/性能特性、多Agent支持、SSRF防护 |
+| **1.3.0** | **0.3.2** | 增强审计工作流：字体提取验证(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT) |
+| 1.2.0 | 0.3.2 | 新增安全/性能特性、多Agent支持、SSRF防护 |
 | 1.1.0 | 0.3.0 | 初始版本，基于 npm 包重构 |

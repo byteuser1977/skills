@@ -1,7 +1,4 @@
-{
-  "name": "colamd-themes",
-  "version": "1.2.0",
-  "description": "ColaMD 主题生成与管理技能 (v0.3.2)，基于 @bytechain.cn/colamd-themes npm 包。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件，以及将 Markdown 导出为 HTML/PDF。v0.3.2 新增：SSRF防护、输入验证、异步I/O、模板缓存、多Agent技能支持。",
+{"name": "colamd-themes", "version": "1.3.0", "description": "ColaMD 主题生成与管理技能 (v1.3.0)，基于 @bytechain.cn/colamd-themes npm 包。支持从 URL、DOCX、PDF 提取视觉格式并转换为符合 v3.0 范式的 CSS 主题文件，以及将 Markdown 导出为 HTML/PDF。v1.3.0 增强：字体提取审计(FA)、配色合理性审计(CA)、背景前景识别(BF)、图案检测(PT)。",
   "author": "ColaMD Community",
   "license": "MIT",
   "npm_package": "@bytechain.cn/colamd-themes",
